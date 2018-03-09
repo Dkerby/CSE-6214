@@ -10,7 +10,6 @@ class InsertionStatus(object):
 		self.i=1
 		self.j=1
 		self.cval=data.numbers[self.i]
-		self.length=len(data.numbers)#not necessary. NumberList holds the link
 
 
 #Main Algorithm class which implements the stepping and sorting
@@ -26,19 +25,36 @@ class Algorithm(object):
         #implementation of insertion sort where information is held between iterations
 	def iterateInsertionSort(self):
 
-                #this is hard to explain... just dont worry about it...
+                # if ( j > 0 && array[j-1] > cval ):
 		if(self.algo.j>0 and self.data.numbers[self.algo.j-1]>self.algo.cval):
+
+                        # array[j]=array[j-1]
 			self.data.numbers[self.algo.j]=self.data.numbers[self.algo.j-1]
+
+			# j--
 			self.algo.j-=1
 		else:
+
+                        # array[j] = cval
 			self.data.numbers[self.algo.j]=self.algo.cval
+
+			# i++
 			self.algo.i+=1
-			if(self.algo.i<self.algo.length):
+
+			# if ( i < len(array) )
+			if(self.algo.i<self.data.length):
+
+                                # cval = array[i]
 				self.algo.cval=self.data.numbers[self.algo.i]
+
+				# j = i
 				self.algo.j=self.algo.i
 			else:
-				
-				self.algo.i-=1
+
+				# i--
+				self.algo.i-=1 #array[i] will thow an error on output because i is out of index range when finished
+
+				# sort is complete
 				self.complete=True
 
 	#does one iteration of the selected algorithm	
