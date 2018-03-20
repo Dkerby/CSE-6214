@@ -6,13 +6,3 @@ class State():
         self.movements = int(movements)
         self.memoryUsage = float(memoryUsage)
         self.runtime = float(runtime)
-    
-    # def dump(self):
-    #     print("x:", self.x)
-    #     print("y:", self.y)
-    #     print("y:", self.z)
-
-    # def set_values(self,A,B,C):
-    #     self.x = A
-    #     self.y= B
-    #     self.z= C
