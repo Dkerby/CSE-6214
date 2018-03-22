@@ -1,49 +1,61 @@
-"""
-This is a pure python implementation of the insertion sort algorithm
 
-For doctests run following command:
-python -m doctest -v insertion_sort.py
-or
-python3 -m doctest -v insertion_sort.py
+class InsertionSort(object):
+	"""
+	Pure implementation of the insertion sort algorithm in Python
 
-For manual testing run:
-python insertion_sort.py
-"""
-from __future__ import print_function
+	for index in range(1, len(array)):
+		while 0 < index and array[index] < array[index - 1]:
+			array[index], array[index - 1] = array[index - 1], array[index]
+			index -= 1
 
+	return array
+	"""
+	def __init__(self, StateObj):
+		self.status=StateObj
+		self.status.i=1
+		self.status.j=1
+		self.cval=self.status.data.numbers[self.status.i]
 
-def insertion_sort(collection):
-    """Pure implementation of the insertion sort algorithm in Python
+	def iterate(self):
+		
+		# if ( j > 0 && array[j-1] > cval ):
+		if(self.status.j>0 and self.status.data.numbers[self.status.j-1]>self.cval):
 
-    :param collection: some mutable ordered collection with heterogeneous
-    comparable items inside
-    :return: the same collection ordered by ascending
+                        # array[j]=array[j-1]
+			self.status.data.numbers[self.status.j]=self.status.data.numbers[self.status.j-1]
 
-    Examples:
-    >>> insertion_sort([0, 5, 3, 2, 2])
-    [0, 2, 2, 3, 5]
+			# j--
+			self.status.j-=1
 
-    >>> insertion_sort([])
-    []
+			#swaps++
+			#compares++
+			self.status.compares+=1
+			self.status.swaps+=1
+		else:
 
-    >>> insertion_sort([-2, -5, -45])
-    [-45, -5, -2]
-    """
-    for index in range(1, len(collection)):
-        while 0 < index and collection[index] < collection[index - 1]:
-            collection[index], collection[
-                index - 1] = collection[index - 1], collection[index]
-            index -= 1
+                        # array[j] = cval
+			self.status.data.numbers[self.status.j]=self.cval
 
-    return collection
+			# i++
+			self.status.i+=1
+	
+			#compares++
+			self.status.compares+=1
 
+			# if ( i < len(array) )
+			if(self.status.i<self.status.data.length):
 
-if __name__ == '__main__':
-    try:
-        raw_input          # Python 2
-    except NameError:
-        raw_input = input  # Python 3
+                                # cval = array[i]
+				self.cval=self.status.data.numbers[self.status.i]
 
-    user_input = raw_input('Enter numbers separated by a comma:\n').strip()
-    unsorted = [int(item) for item in user_input.split(',')]
-    print(insertion_sort(unsorted))
+				# j = i
+				self.status.j=self.status.i
+
+			else:
+
+				# set i and j to 0
+				self.status.i=0
+				self.status.j=0
+
+				# sort is complete
+				self.status.sorting=False

@@ -1,50 +1,45 @@
-"""
-This is pure python implementation of bubble sort algorithm
 
-For doctests run following command:
-python -m doctest -v bubble_sort.py
-or
-python3 -m doctest -v bubble_sort.py
+class BubbleSort(object):
+	"""
+	Pure implementation of bubble sort algorithm in Python
 
-For manual testing run:
-python bubble_sort.py
-"""
+	length = len(array)
+	for i in range(length):
+		for j in range(length-1):
+			if array[j] > array[j+1]:
+				array[j], array[j+1] = array[j+1], array[j]
 
-from __future__ import print_function
+	return array
+	"""
 
-
-def bubble_sort(collection):
-    """Pure implementation of bubble sort algorithm in Python
-
-    :param collection: some mutable ordered collection with heterogeneous
-    comparable items inside
-    :return: the same collection ordered by ascending
-
-    Examples:
-    >>> bubble_sort([0, 5, 3, 2, 2])
-    [0, 2, 2, 3, 5]
-
-    >>> bubble_sort([])
-    []
-
-    >>> bubble_sort([-2, -5, -45])
-    [-45, -5, -2]
-    """
-    length = len(collection)
-    for i in range(length):
-        for j in range(length-1):
-            if collection[j] > collection[j+1]:
-                collection[j], collection[j+1] = collection[j+1], collection[j]
-
-    return collection
+	def __init__(self, StateObj):
+		self.status=StateObj
 
 
-if __name__ == '__main__':
-    try:
-        raw_input          # Python 2
-    except NameError:
-        raw_input = input  # Python 3
+	def iterate(self):
+		
+		arrLength=self.status.data.length
+		if(self.status.i<arrLength):
 
-    user_input = raw_input('Enter numbers separated by a comma:\n').strip()
-    unsorted = [int(item) for item in user_input.split(',')]
-    print(bubble_sort(unsorted))
+			if(self.status.j<(arrLength-self.status.i-1)):
+				if(self.status.data.numbers[self.status.j]>self.status.data.numbers[self.status.j+1]):
+					self.status.data.numbers[self.status.j], self.status.data.numbers[self.status.j+1] = self.status.data.numbers[self.status.j+1], self.status.data.numbers[self.status.j]
+					
+					#swaps++
+					#compares++
+					self.status.compares+=1
+					self.status.swaps+=1
+
+				self.status.j+=1
+
+				#compares++
+				self.status.compares+=1
+			else:
+				self.status.j=0
+				self.status.i+=1
+		else:
+			self.status.i=0
+			self.status.j=0
+			self.status.sorting=False
+
+
