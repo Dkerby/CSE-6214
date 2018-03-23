@@ -170,7 +170,7 @@ class MergeSort(object):
 				temp=self.splitStack.pop()
 
 				#divide it in half and push the two halfs back on the stack
-				mid=(len(temp)/2)
+				mid=int(len(temp)/2)
 				self.splitStack.append(temp[:mid])
 				self.splitStack.append(temp[mid:])
 		

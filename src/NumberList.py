@@ -6,7 +6,7 @@ class NumberList(object):
         self.length = len(numbers)
 
     def generateRandom(self, size):
-        self.numbers = random.sample(xrange(1, size+1), size)
+        self.numbers = random.sample(range(1, size+1), size)
         self.length = len(self.numbers)
 
     def importListFromFile(self, filename):
