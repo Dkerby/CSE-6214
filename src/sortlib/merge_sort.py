@@ -45,6 +45,16 @@ class MergeSort(object):
 		self.splitStack=[self.status.data.numbers]
 		self.mergeStack=[]
 		self.mergeArray=[]
+		self.lines=[]
+		self.lines.append("\nmidpoint = length / 2\nleft_half = merge_sort(array[:midpoint])\nright_half = merge_sort(array[midpoint:])")
+		self.lines.append("\ni,j,k = 0\nleft_length = len(left_half)\nright_length = len(right_half)")
+		self.lines.append("\nwhile i < left_length and j < right_length:")
+		self.lines.append("\n\tif left_half[i] < right_half[j]:\n\t\tarray[k] = left_half[i]\n\t\ti += 1")
+		self.lines.append("\n\telse:\n\t\tarray[k] = right_half[j]\n\t\tj += 1\n\tk += 1")
+		self.lines.append("\nwhile i < left_length:")
+		self.lines.append("\n\tarray[k] = left_half[i]\n\ti += 1\n\tk += 1")
+		self.lines.append("\nwhile j < right_length:")
+		self.lines.append("\n\tarray[k] = right_half[j]\n\tj += 1\n\tk += 1")
 
 	def iterate(self):
 
@@ -74,12 +84,14 @@ class MergeSort(object):
 		#the following elif statements check the top of the stack
 		#if the stack is empty, top() will throw an error
 		if(mergeStack==[]):
-			merging=False #python also throws an error if theres no code in this block
+			self.status.currentLine=0
 
 		
 		#If there is more than one array in the merge stack,
 		#then check to see if they can merge
 		elif((len(mergeStack) > 1) and (len(self.top(mergeStack)) < self.status.data.length)):
+	
+			self.status.currentLine=0
 
 			#the righthalf of the merged array is the top of the stack
 			righthalf=mergeStack[len(mergeStack)-1]
@@ -107,12 +119,16 @@ class MergeSort(object):
 
 						#swaps++
 						self.status.swaps+=1
+
+						self.status.currentLine=3
 					else:
 						mergeArray.append(righthalf[self.relative_j])
 						self.relative_j+=1
 
 						#swaps++
 						self.status.swaps+=1
+
+						self.status.currentLine=4
 
 					#compares++
 					self.status.compares+=1
@@ -126,6 +142,8 @@ class MergeSort(object):
 					self.status.compares+=1
 					self.status.swaps+=1
 
+					self.status.currentLine=6
+
 				elif( self.relative_j < len(righthalf)):
 					mergeArray.append(righthalf[self.relative_j])
 					self.relative_j+=1
@@ -134,6 +152,8 @@ class MergeSort(object):
 					#compares++
 					self.status.compares+=1
 					self.status.swaps+=1
+
+					self.status.currentLine=8
 
 
 				#If the arrays are fully merged
@@ -151,16 +171,19 @@ class MergeSort(object):
 	
 					#reset the array used for merging
 					self.mergeArray=[]
+
+					self.status.currentLine=0
 		
 		#if sort is complete
 		elif(len(self.top(mergeStack))==self.status.data.length):
-			#self.data.numbers=self.top(mergeStack)
+			self.status.currentLine=1
 			self.status.sorting=False
 
 		if(not merging):
 
 			#if the split stack is empty, dont do anything here
 			if(splitStack==[]):
+				self.status.currentLine=1
 				return
 
 			#split the array if the one one top has more than one
@@ -173,6 +196,8 @@ class MergeSort(object):
 				mid=int(len(temp)/2)
 				self.splitStack.append(temp[:mid])
 				self.splitStack.append(temp[mid:])
+			
+				self.status.currentLine=0
 		
 			#if the top array on the splitStack is exactly one element
 			else:
@@ -180,6 +205,7 @@ class MergeSort(object):
 				while(len(self.top(splitStack))==1):
 
 					self.mergeStack.append(self.splitStack.pop())
+					self.status.currentLine=1
 					if(self.splitStack==[]):
 						return
 		self.updateMergeArray()

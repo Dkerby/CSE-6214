@@ -15,6 +15,9 @@ class InsertionSort(object):
 		self.status.i=1
 		self.status.j=1
 		self.cval=self.status.data.numbers[self.status.i]
+		self.lines=[]
+		self.lines.append("\nfor i in range(1, len(array)):")
+		self.lines.append("\n\twhile 0 < index and array[index] < array[index - 1]:\n\t\tarray[index], array[index - 1] = array[index - 1], array[index]\n\t\tindex -= 1")
 
 	def iterate(self):
 		
@@ -31,6 +34,8 @@ class InsertionSort(object):
 			#compares++
 			self.status.compares+=1
 			self.status.swaps+=1
+
+			self.status.currentLine=1
 		else:
 
                         # array[j] = cval
@@ -41,6 +46,8 @@ class InsertionSort(object):
 	
 			#compares++
 			self.status.compares+=1
+
+			self.status.currentLine=0
 
 			# if ( i < len(array) )
 			if(self.status.i<self.status.data.length):

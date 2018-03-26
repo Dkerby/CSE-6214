@@ -5,14 +5,20 @@ class QuickSort(object):
 	"""
 	Pure implementation of quick sort algorithm in Python
 
-	ARRAY_LENGTH = len(ARRAY)
-	if( ARRAY_LENGTH <= 1):
-		return ARRAY
+
+	if( len(array) <= 1):
+		return
 	else:
-		PIVOT = ARRAY[0]
-		GREATER = [ element for element in ARRAY[1:] if element > PIVOT ]
-		LESSER = [ element for element in ARRAY[1:] if element <= PIVOT ]
-		return quick_sort(LESSER) + [PIVOT] + quick_sort(GREATER)
+		pivot = len(array)-1
+		i=0
+		for j in array:
+			if j <= array[pivot]:
+				i++
+				array[i], j = j, array[i]
+		array[i+1], array[pivot] = array[pivot], array[i+1]
+		QuickSort(array[:i+1])
+		QuickSort(array[i+2:])
+				
     	"""
 	def __init__(self, StateObj):
 		self.status=StateObj
@@ -26,6 +32,15 @@ class QuickSort(object):
 
 		#pivot defaults to last element of subarray
 		self.p=(len(self.status.data.numbers)-1)
+
+		self.lines=[]
+		self.lines.append("\nif( len(array) <= 1):\n\treturn")
+		self.lines.append("\nelse:\n\tpivot = len(array)-1\n\ti=0")
+		self.lines.append("\n\tfor j in array:")
+		self.lines.append("\n\t\tif j <= array[pivot]:")
+		self.lines.append("\n\t\t\ti++\n\t\t\tarray[i], j = j, array[i]")
+		self.lines.append("\n\tarray[i+1], array[pivot] = array[pivot], array[i+1]")
+		self.lines.append("\n\tQuickSort(array[:i+1])\n\tQuickSort(array[i+2:])")
 
 
 	def iterate(self):
@@ -49,6 +64,11 @@ class QuickSort(object):
 
 					#swaps++
 					self.status.swaps+=1
+
+					self.status.currentLine=4
+	
+				else:
+					self.status.currentLine=3
 
 				#j++
 				self.status.j+=1
@@ -87,6 +107,8 @@ class QuickSort(object):
 
 				#swaps++
 				self.status.swaps+=1
+
+				self.status.currentLine=6
 		
 		#if the subarray is sorted		
 		else:
@@ -96,6 +118,8 @@ class QuickSort(object):
 
 			#pop the top off of end stack
 			self.end.pop()
+
+			self.status.currentLine=0
 
 			#if the stacks are empty, then the entire array is sorted
 			if(self.begin==[]):

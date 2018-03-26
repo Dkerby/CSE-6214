@@ -161,7 +161,13 @@ def main(argv):
                 output+="\nj:\t\t"+str(StateObj.j)
                 output+="\nComparisons:\t"+str(StateObj.compares)
                 output+="\nMovements:\t"+str(StateObj.swaps)
-                output+="\nMemory Used:\t"+str(StateObj.memUsage)+" Bytes"
+                output+="\nMemory Used:\t"+str(StateObj.memUsage)+" Bytes\n\n"
+
+                for line in x.algo.lines:
+                        if (x.algo.lines[StateObj.currentLine]==line):
+                                output+= '\x1b[0;37;41m' + line + '\x1b[0m'
+                        else:
+                                output+=line
                 
                 #clear stdout
                 os.system('clear')
