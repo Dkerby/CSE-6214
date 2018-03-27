@@ -19,6 +19,16 @@ class NumberList(object):
         self.numbers = tempList
 
         f.close()
+		
+    def importListFromText(self, fileText):
+        fileText = fileText.decode("utf-8") 
+        fileText = fileText.replace(" ", "")
+        self.numbers = fileText.split(',')
+		
+        for i in range(len(self.numbers)):
+            self.numbers[i] = int(self.numbers[i])
+			
+        self.length = len(self.numbers)
 
     def exportListToFile(self, filename):
         file = open(filename,"w")

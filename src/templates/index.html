@@ -6,13 +6,15 @@
 		<meta name="description" content="The Better Ones Sort">
 		<meta name="author" content="Group 1">
 
-        <link rel="stylesheet" teyp="text/css" href="{{ url_for('static', filename='css/material.min.css') }}">
-		<script type="text/javascript" src="{{ url_for('static', filename='js/material.min.js') }}"></script>
-		<script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.slim.js') }}"></script>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/material.min.css') }}">
+		<script src="{{ url_for('static', filename='js/material.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/socket.io.slim.js') }}"></script>
 		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+		<link rel="stylesheet" type="text/css" media="screen" href="//cdn.muicss.com/mui-0.9.38/css/mui.css" />
+		<script src="//cdn.muicss.com/mui-0.9.38/js/mui.js"></script>
+		<script src="{{ url_for('static', filename='js/chartjs/dist/Chart.js') }}"></script>
 		<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 	</head>
 
 	<body>
@@ -22,27 +24,73 @@
 		    <div class="mdl-layout__header-row">
 		      <!-- Title -->
 		      <span class="mdl-layout-title">The Better Ones: Sort all the things!</span>
-		      <!-- Add spacer, to align navigation to the right -->
-		      <div class="mdl-layout-spacer"></div>
-		      <!-- Navigation. We hide it in small screens. -->
-		      <nav class="mdl-navigation mdl-layout--large-screen-only">
-		        <a class="mdl-navigation__link" href="">Example Link</a>
-		      </nav>
 		    </div>
 		  </header>
-		  <div class="mdl-layout__drawer">
-		    <span class="mdl-layout-title">Example Drawer</span>
-		    <nav class="mdl-navigation">
-		      <a class="mdl-navigation__link" href="">Example Link</a>
-		    </nav>
-		  </div>
+
 		  <main class="mdl-layout__content">
 		    <div class="page-content">
-			    <!-- Your content goes here -->
-			    <h1 class="helloworld"><strong>Hello world!</strong></h1>
-			    <button id="helloworldbutton" onclick="printHelloWorld()">Print to console</button>
+				<div>
+					<p id="error" style="color:red"></p>
+					<div id="inputs" style="display:inline-flex;width:85%;border-style:solid;border-color:midnightblue;padding:5px 5%;margin-bottom: 10px;">
+						<div>
+							<h2> Choose Algorithm </h2>
+							<button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
+								<span id="algorithm"> Merge Sort </span>
+								<span class="mui-caret"></span>
+							</button>
+							<ul class="mui-dropdown__menu">
+							<li class="option" onclick="chooseAlgorithm('Merge')">Merge Sort</li>
+							<li class="option" onclick="chooseAlgorithm('Bubble')">Bubble Sort</li>
+							<li class="option" onclick="chooseAlgorithm('Insertion')">Insertion Sort</li>
+							<li class="option" onclick="chooseAlgorithm('Heap')">Heap Sort</li>
+							<li class="option" onclick="chooseAlgorithm('Quick')">Quick Sort</li>
+							</ul>
+						</div>
+						
+						<div style="margin-left:10%">
+						<h2> Load a List </h2>
+						<label style="margin-left:10%">
+							<input id="file" type="file" onchange="fileUploaded(this.files[0])"/>
+						</label>
+						</div>
+						
+						<div>
+						<h2> Or Generate Random List </h2>
+						<h3  style="margin-left:10%"> List Size:
+							<span id="sliderValue">20</span>
+							<input id="sizeSlider" class="mdl-slider mdl-js-slider" type="range" min="2" max="100" value="20" tabindex="0" onchange="updateSliderValue()">
+						</h3>
+						</div>
+						
+						<div style="margin-left:10%">
+							<button id="play" class="mui-btn mui-btn--primary" onclick="play()" style="margin-top:20px;"> Play </button>
+							<button id="pause" class="mui-btn mui-btn--primary" onclick="pause()" style="opacity:0; margin-top:20px;"> Pause </button>
+						</div>
+					</div>
+					
+					<div style="display:inline-flex;margin-left:5%;width:100%;">
+						<div>
+							<h3 style="text-align:center"> Psudocode: </h3>
+							<div id="psudocode" style="min-width:25%;">
+							</div>
+						</div>
+						<script>
+							showPsudocode("Merge");
+						</script>
+						<div style="width:60%;margin-left:5%;">
+							<canvas id="numbers" style="max-height:45vh;min-width:100%;">
+							</canvas>
+							<div id="stats" style="opacity:0;text-align:center">
+								<h3> <b>Compares:</b> <span id="compares"></span> </h3>
+								<h3> <b>Swaps:</b> <span id="swaps"></span> </h3>
+								<h3> <b>Memory Usage:</b> <span id="memory"></span> </h3>
+							</div>
+						</div>
+					</div>
+					
+				</div>
 		    </div>
 		  </main>
 		</div>
-	<body>
+	</body>
 </html>
