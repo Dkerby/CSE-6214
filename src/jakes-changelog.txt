@@ -7,23 +7,24 @@ I changed around the design of the code a little bit to reduce the complexity of
 
 Here's the basics:
 	
-	*Algorithm doesnt create the State or the NumberList objects. It only uses them by performing
+	*Algorithm creates and holds the State or the NumberList objects. It uses them by performing
 	 operations on them to help sort the data in NumberList and update the metadata in State.
-	 This means that the NumberList and State objects need to be created independently of Algorithm
-	 and then passed into Algorithm when it is created.
+
+	*I added a bunch of methods to Algorithm to help turn it into a fully-actualized API
 
 
-	*I moved the NumberList object into the State object as a datamember so that the sorting algorithms
-	 can see and operate on the data through the State object. This means that the State object is the only
-	 thing the sorting algorithms need to do their job.
+	*I moved the NumberList object into the State object as a datamember so that the 
+	 sorting algorithms can see and operate on the data through the State object. 
+	 This means that the State object is the only thing the sorting algorithms 
+ 	 need to do their job.
 
 
 	*Each individual sorting algorithm has been moved into its own class/file in the sortlib.
 	 These algorithms get the State object passed into them when they are created, so that they
-	 can store the i and j values in state. This way, the i and j values can be used for the output
-	 as well as helping the algorithm keep its place in the sort. Some algorithms need additional 
-	 placeholder information, but these are simply kept as datamembers in the individual 
-	 sort algorithm's class.
+	 can store the i and j values in state. This way, the i and j values can be used for 
+	 the output as well as helping the algorithm keep its place in the sort. Some 
+	 algorithms need additional placeholder information, but these are simply kept 
+	 as datamembers in the individual sort algorithm's class.
 
 
 
@@ -35,128 +36,94 @@ Here's the basics:
 
 The general method behind using the sorting algorithm is as follows:
 
-	1- 	create a new NumberList object and populate it.
-	2- 	create a new State object and pass NumberList into the constructor.
-			make sure the second argument is TRUE or the algorithm wont step().
-
-	3- 	create a new Algorithm object and pass State into the constructor.
-		Also choose the algorithm to use when creating the Algorithm object.
+	1- 	create a new Algorithm object with the following constructor arguments:
+		The First argument should always be TRUE unless you want the algorithm to not sort
+		The Second argument is the choice of algorithm:
 			1 = Insertion Sort
 			2 = Bubble Sort
 			3 = Quick Sort
 			4 = Merge Sort
 			There may be more but they havent been implemented yet.
-	
-	4-	call Algorithm.step() in a loop.
-	5-	update the output with every iteration of the step-loop.
-
-
-
-
-
-
-
-
-
-A little more detail about Each of the classes:
-
-
-
-Algorithm():
-
-	Data Members:
 		
-		*status -- holds the State object
-		*algochoice -- holds the user's chosen algorithm as an int. the int values match up to specific algorithms
-		*algo -- holds the specific sorting algorithm object. EG: QuickSort() or MergeSort()
-
-
-	Methods:
+		The Third argument is the speed of the steps in seconds (default is 0.025)
+		The Fourth argument is the size of the data array that needs to be sorted.
+		(generates 200 random numbers by default)
 	
-		*constructor( State() (required), algochoice (default: insertionsort)):
+	2-	call Algorithm.step() in a loop.
+	3-	update the output with every iteration of the step-loop.
+
+
+
+
+
+
+
+
+
+A little more detail about the Algorithm Methods:
+
+
+
+Algorithm() Methods:
+	
+		*constructor( 	sorting (default:TRUE), 
+				algochoice (default: 1(insertionsort)),
+				speed (default: 0.025),
+				arrsize (default: 200)):
 
 			creates the algo object depending on what algochoice is.
-			passes State into the newly created algorithm so that State can be
-			updated.
+			creates the NumberList and State objects
+			NumberList object originally contains randomly 
+			generated integers of size <arrsize>.
 
 
-		*reset(	NumberList() (default: random list of same size as what has been used),
-			algochoice (default: same algorithm already in use),
-			reset_mem (default: True),
-			reset_runtime (default: True) ):
+		*reset(	algochoice (default: same algorithm already in use)):
 
-			restarts the algorithm from the beginning with a new set of data if none
-			is provided when calling this method. Also lets the user choose to use a
-			different algorithm. Will reset memory usage and runtime if not specified
-			otherwise.
+			restarts the algorithm from the beginning with a new set of data. Also lets 				the user choose to use a different algorithm.
+			otherwise. data is randomly generated, so export data to file before calling
+			this method if you want to save it.
 
 		
 		*step():
 			
 			iterates the chosen algorithm once.
 			it will update NumberList and State when it does.
+			waits for <self.speed> seconds before exiting the method.
 
-
-
-
-
-
-NumberList():
-
-	Data Members:
-
-		*numbers -- holds the array that is being sorted
-		*length -- len(array)
-
-
-	Methods:
-
-		*constructor ( numbers=[] ):
+		*getState():
 			
-			it defaults numbers to an empty list and length to zero.
+			returns the state object currently being used.
+			the object can be used to retrieve the data stored in the state object
 
+		*setData(int list):
 
-		*generateRandom(size):
+			sets data to the list that is passed into this method.
 
-			generates random array of length <size> in the range of (1 to <size>) for
-			the number values.
+		*getData()
 
-		*importListFromFile( filename ):
+			returns the integer list that is being sorted.
 
-			do I need to explain this one?
+		*importData(string: filename)
 
-		*exportListToFile( filename ):
-	
-			same as above.
+			sets data to the list in the file named <filename> that is 
+			passed into this method
 
+		*exportData(string: filename)
 
+			exports data in the list being sorted into a file named <filename>
 
+		*setRandomData(size)
 
+			sets data equal to a list of random integers of length <size>
 
-State():
+		*getFormat()
 
-	Data Members:
+			returns string containing the data formatted for display on commandline.
 
-		*data -- holds NumberList object
-		*sorting -- boolean value indicates whether the sort is done or not.
-		*speed -- amount of time, in seconds, between each step(). Is a float, so fractions are available
 		
-		The rest of these default to zero and get updated with every step():
-
-		*currentLine
-		*compares
-		*swaps
-		*memUsage
-		*runtime
-		*i
-		*j
+			
 
 
-	Methods:
-		
-		Constructor ( 	NumberList object (required),
-				sorting (default: False),
-				speed (default: 0.05) )
 
 
 
