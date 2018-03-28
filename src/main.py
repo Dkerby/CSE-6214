@@ -44,27 +44,29 @@ def connect_msg():
 	
 @socketio.on('startSorting')
 def startSorting(data):
-	global numberList
 	global state
 	global algorithm 
 	
-	numberList = nl.NumberList()
-	
 	if('file' in data.keys()):
-		numberList.importListFromText(data['file']);
+		algorithm=alg.Algorithm(True, data['choice'], 0.025, 100)
+		algorithm.importText(data['file']);
+		
 	else:
-		numberList.generateRandom(data['size'])
-	state=st.State(numberList, True)
-	algorithm=alg.Algorithm(state, data['choice'])
-	emit('sorting', {'numbers':numberList.numbers, 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+		algorithm=alg.Algorithm(True, data['choice'], 0.025, data['size'])
+		algorithm.setRandomData(data['size'])
+	
+	state=algorithm.getState()
+	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
 
 @socketio.on('step')
 def step():
+	global state
 	if(not state.sorting):
 		emit('doneSorting')
 	else:
 		algorithm.step()
-		emit('sorting', {'numbers':numberList.numbers, 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
+		state = algorithm.getState()
+		emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
 
 @socketio.on('browserEvent')
 def browser_event(eventMsg):
