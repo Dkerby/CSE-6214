@@ -213,7 +213,7 @@ function highlightLine(line) {
 }
 
 function stop() {
-	document.getElementById('play').innerHTML = "Play";
+	document.getElementById('play').innerHTML = "Start";
 	document.getElementById('play').onclick = play;
 	document.getElementById('pause').style.opacity = "0";
 	playing = false;
@@ -222,11 +222,13 @@ function stop() {
 function pause() {
 	if(playing) {
 		playing = false;
-		document.getElementById('pause').innerHTML = "Play";
+		document.getElementById('pause').innerHTML = "Resume";
+		document.getElementById('step').style.opacity = "1";
 	} else {
 		playing = true;
 		socket.emit("step");
 		document.getElementById('pause').innerHTML = "Pause";
+		document.getElementById('step').style.opacity = "0";
 	}
 }
 
@@ -287,8 +289,9 @@ function updateState(state) {
 						</div>
 						
 						<div style="margin-left:10%">
-							<button id="play" class="mui-btn mui-btn--primary" onclick="play()" style="margin-top:20px;"> Play </button>
+							<button id="play" class="mui-btn mui-btn--primary" onclick="play()" style="margin-top:20px;"> Start </button>
 							<button id="pause" class="mui-btn mui-btn--primary" onclick="pause()" style="opacity:0; margin-top:20px;"> Pause </button>
+							<button id="step" class="mui-btn mui-btn--primary" onclick="socket.emit('step')" style="opacity:0; margin-top:20px;"> Step </button>
 						</div>
 					</div>
 					
