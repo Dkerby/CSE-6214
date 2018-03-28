@@ -11,6 +11,10 @@ from flask_socketio import SocketIO, emit
 # import trace
 import webbrowser
 
+import NumberList as nl #holds the data
+import State as st #holds state of algorithm
+import Algorithm as alg #holds algorithm 
+
 # Add lib folder to python runtime path inorder to import desired algorithms
 # from sortlib import
 #   bubble_sort, quick_sort, merge_sort, selection_sort, heap_sort
@@ -25,6 +29,9 @@ import webbrowser
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+algorithm = False
+numberList = False
+state = False
 
 @app.route('/', methods=['GET'])
 def index():
@@ -33,20 +40,41 @@ def index():
 
 @socketio.on('connect')
 def connect_msg():
-    print("The browser is now connected to me")
-    emit('serverEvent', {'data': 'Server connected, so I emitted this data'})
+	print("The browser is now connected to me")
+	
+@socketio.on('startSorting')
+def startSorting(data):
+	global numberList
+	global state
+	global algorithm 
 
+	algorithm=alg.Algorithm(True, data['choice'])
+	
+	if('file' in data.keys()):
+		algorithm.importText(data['file']);
+	else:
+		algorithm.setRandomData(data['size'])
+	state=getState()
+
+	emit('sorting', {'numbers':algorithm.getData, 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+
+@socketio.on('step')
+def step():
+	if(not state.sorting):
+		emit('doneSorting')
+	else:
+		algorithm.step()
+		emit('sorting', {'numbers':numberList.numbers, 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
 
 @socketio.on('browserEvent')
 def browser_event(eventMsg):
-    print("The browser had an event!")
-    print(eventMsg)
+	print("The browser had an event!")
+	print(eventMsg)
 
 
 def main():
-    print("hello world!")
-
+	print("hello world!")
 
 if __name__ == '__main__':
-    webbrowser.open("http://localhost:5000", 2, autoraise=True)
-    socketio.run(app)
+	webbrowser.open("http://localhost:5000", 2, autoraise=True)
+	socketio.run(app, port=5000)
