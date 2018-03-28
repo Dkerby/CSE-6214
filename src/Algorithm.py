@@ -84,13 +84,17 @@ class Algorithm(object):
                 return self.status.data.numbers
         
         #*****************************************************************************************
-        # bool importData(string filename)
+        # void importData(string filename)
         def importData(self,filename):
                 self.status.data.importListFromFile(filename)
 
+        #*****************************************************************************************
+        # void importText(string filename)      
+        def importText(self, filetext):
+                self.status.data.importListFromText(filetext)
         
         #*****************************************************************************************
-        # bool exportData(string filename)
+        # void exportData(string filename)
         def exportData(self,filename):
                 self.status.data.exportListToFile(filename)
                 
