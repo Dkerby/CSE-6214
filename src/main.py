@@ -46,16 +46,16 @@ def connect_msg():
 def startSorting(data):
 	global state
 	global algorithm 
+
+	algorithm=alg.Algorithm(True, data['choice'])
 	
 	if('file' in data.keys()):
-		algorithm=alg.Algorithm(True, data['choice'], 0.025, 100)
 		algorithm.importText(data['file']);
-		
 	else:
-		algorithm=alg.Algorithm(True, data['choice'], 0.025, data['size'])
 		algorithm.setRandomData(data['size'])
-	
+
 	state=algorithm.getState()
+
 	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
 
 @socketio.on('step')
@@ -65,7 +65,6 @@ def step():
 		emit('doneSorting')
 	else:
 		algorithm.step()
-		state = algorithm.getState()
 		emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
 
 @socketio.on('browserEvent')
@@ -78,5 +77,5 @@ def main():
 	print("hello world!")
 
 if __name__ == '__main__':
-	webbrowser.open("http://localhost:5000", 2, autoraise=True)
-	socketio.run(app, port=5000)
+	webbrowser.open("http://localhost:5500", 2, autoraise=True)
+	socketio.run(app, port=5500)

@@ -22,6 +22,7 @@ class QuickSort(object):
     	"""
 	def __init__(self, StateObj):
 		self.status=StateObj
+		self.firstStep=True
 		self.status.i=-1
 		self.status.j=0
 
@@ -44,7 +45,21 @@ class QuickSort(object):
 
 
 	def iterate(self):
-		
+		if(self.firstStep):
+			self.firstStep=False
+			self.status.i=-1
+			self.status.j=0
+
+			#these are stacks so that the algorithm can hold a trace/history
+			#of the subarrays.
+			self.begin=[0]
+			self.end=[(len(self.status.data.numbers)-1)]
+
+			#pivot defaults to last element of subarray
+			self.p=(len(self.status.data.numbers)-1)
+			return
+
+
 		#if the subarray is not sorted
 		if(self.top(self.begin)<self.top(self.end)):
 
