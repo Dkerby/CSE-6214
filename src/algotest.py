@@ -1,11 +1,9 @@
 from __future__ import print_function
 
-import time,os,sys, getopt 
-#time used for waiting, os used for clearing the cmdline output, 
+import os,sys, getopt 
+#os used for clearing the cmdline output, 
 #sys and geopt used for cmdline arguments
 
-import NumberList as nl #holds the data
-import State as st #holds state of algorithm
 import Algorithm as alg # holds algorithm
 
 ################################################################################
@@ -88,83 +86,28 @@ def main(argv):
 
 
         #creates NumberList, State, and Algorithm objects
-        NumberObj=nl.NumberList() #empty at first
-        NumberObj.generateRandom(arrsize) #generate array of size <arrsize>
-        StateObj=st.State(NumberObj, True, speed) #create state object to hold status info
-        x=alg.Algorithm(StateObj, algochoice) #pass State object into Algorithm along with the choice of algorithm
-
+        x=alg.Algorithm(True, algochoice, speed, arrsize) #pass State object into Algorithm along with the choice of algorithm
+        state=x.getState()
         #while algorithm is not complete, keep on steppin'
-        while(StateObj.sorting):
+
+        while(state.sorting):
 
                 #step it up!
                 x.step()
-
-                #local variables for i, j, and any others
-                #this ternary-operator-esque structure is to ensure we dont
-                #try to look at an index that is out of bounds of the array
-                i = StateObj.i if StateObj.i<NumberObj.length-1 else StateObj.i-1
-                j = StateObj.j if StateObj.j<NumberObj.length-1 else StateObj.j-1
-
-
-                
-                #-----------------------FORMATTING--------------------------------#
-                # This section formats the output for the algorithm that the user has
-                # picked. most of the information is in the State object, but some of the
-                # data members are specific to the algorithm. these specific data members
-                # are in the specific algorithm class, which can be found by calling 
-                # Algorithm.algo.[whatever value you want]
-                #
-                # \x1b[...m  values are for colors
-
-                #INSERTION SORT FORMATTING
-                if(x.algochoice==1):
-                        output="Data:\n" + str(NumberObj.numbers[:j]) + '\x1b[0;37;41m' + str(NumberObj.numbers[j]) + '\x1b[0m' + str(NumberObj.numbers[j+1:i]) + '\x1b[0;30;44m' + str(NumberObj.numbers[i]) + '\x1b[0m' + str(NumberObj.numbers[i+1:])
-
-
-
-                #QUICK SORT FORMATTING
-                elif(x.algochoice==3):
-                        b = 0 if x.algo.begin==[] else x.algo.top(x.algo.begin)
-                        e = (NumberObj.length-1) if x.algo.end==[] else x.algo.top(x.algo.end)
-                        element_i = '\x1b[0;37;41m' + str(NumberObj.numbers[i]) + '\x1b[0m'
-                        element_j = '\x1b[0;30;44m' + str(NumberObj.numbers[j]) + '\x1b[0m'
-                        sortedData=str(NumberObj.numbers[:b])
-                        subArray = '\x1b[1;32m' + str(NumberObj.numbers[b:i]) + '\x1b[0m' + element_i + '\x1b[1;32m' + str(NumberObj.numbers[i+1:j]) + '\x1b[0m' + element_j + '\x1b[1;32m' + str(NumberObj.numbers[j+1:e]) + '\x1b[0m'
-                        unsortedData=str(NumberObj.numbers[e:])
-                        output="Data:\n"+sortedData+subArray+unsortedData
-
-
-                                
-                #MERGE SORT FORMATTING  
-                elif(x.algochoice==4):
-                        element_i = '\x1b[0;37;41m' + str(NumberObj.numbers[i]) + '\x1b[0m'
-                        element_j = '\x1b[0;30;44m' + str(NumberObj.numbers[j]) + '\x1b[0m'
-
-                        output="Unsorted Stack:\n\n" + str(x.algo.splitStack) + "\n Merge Stack:\n\n" + str(x.algo.mergeStack)+ "\n\nDATA:\n\n"+ str(NumberObj.numbers[:i]) + element_i + str(NumberObj.numbers[i+1:j]) + element_j + str(NumberObj.numbers[j+1:])
-
-
-
-                #BUBBLE SORT FORMATTING 
-                elif(x.algochoice==2):
-                        prehighlights=str(NumberObj.numbers[:j])
-                        highlights= '\x1b[0;37;41m' + str(NumberObj.numbers[j]) + '\x1b[0m' + '\x1b[0;30;44m' + str(NumberObj.numbers[j+1]) + '\x1b[0m'
-                        posthighlights=str(NumberObj.numbers[j+2:])
-                        output="Data:\n" + prehighlights + highlights + posthighlights
-
-
-
-                
-
+                state=x.getState()
+                output=x.getFormat()
 
                 #ADD I, J, SWAP, AND COMPARISON DATA TO OUTPUT
-                output+="\n\ni:\t\t"+str(StateObj.i)
-                output+="\nj:\t\t"+str(StateObj.j)
-                output+="\nComparisons:\t"+str(StateObj.compares)
-                output+="\nMovements:\t"+str(StateObj.swaps)
-                output+="\nMemory Used:\t"+str(StateObj.memUsage)+" Bytes\n\n"
+                output+="\n\ni:\t\t"+str(state.i)
+                output+="\nj:\t\t"+str(state.j)
+                output+="\nComparisons:\t"+str(state.compares)
+                output+="\nMovements:\t"+str(state.swaps)
+                output+="\nMemory Used:\t"+str(state.memUsage)+" Bytes\n\n"
 
+
+		#Higlighting the pseudocode
                 for line in x.algo.lines:
-                        if (x.algo.lines[StateObj.currentLine]==line):
+                        if (x.algo.lines[state.currentLine]==line):
                                 output+= '\x1b[0;37;41m' + line + '\x1b[0m'
                         else:
                                 output+=line
@@ -178,10 +121,7 @@ def main(argv):
 
                 #this is where the -w option comes into play
                 if(wait):
-                        raw_input("<hit enter to step>")
-
-                #wait for a bit so that the output can actually be seen while playing
-                time.sleep(StateObj.speed)
+                        input("<hit enter to step>")
 
 
 
