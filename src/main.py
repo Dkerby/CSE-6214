@@ -47,16 +47,17 @@ def startSorting(data):
 	global numberList
 	global state
 	global algorithm 
-	
-	numberList = nl.NumberList()
+
+	algorithm=alg.Algorithm(True, data['choice'])
 	
 	if('file' in data.keys()):
-		numberList.importListFromText(data['file']);
+		algorithm.importText(data['file']);
 	else:
-		numberList.generateRandom(data['size'])
-	state=st.State(numberList, True)
-	algorithm=alg.Algorithm(state, data['choice'])
-	emit('sorting', {'numbers':numberList.numbers, 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+		algorithm.setRandomData(data['size'])
+	state=getState()
+
+	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+
 
 @socketio.on('step')
 def step():
