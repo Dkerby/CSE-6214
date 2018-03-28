@@ -56,7 +56,8 @@ def startSorting(data):
 		algorithm.setRandomData(data['size'])
 	state=getState()
 
-	emit('sorting', {'numbers':algorithm.getData, 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+
 
 @socketio.on('step')
 def step():
