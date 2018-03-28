@@ -11,6 +11,10 @@ Intro Software Engineering Group 1 Project
 7. Ensure that you can run our main program: `python src/main.py`
 8. If everything works you are good to go!
 
+# To Start the Web Server
+1. Switch into your pipenv shell with: `pipenv shell`
+2. Get into the src folder: `cd src`
+3. Run our main program: `python main.py`
 
 # Tools used and corresponding resources
 - [Flask](http://flask.pocoo.org/) and [SocketIO for Flask](https://github.com/miguelgrinberg/Flask-SocketIO)
