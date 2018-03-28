@@ -6,7 +6,7 @@ class NumberList(object):
         self.length = len(numbers)
 
     def generateRandom(self, size):
-        self.numbers = random.sample(xrange(1, 10000), size)
+        self.numbers = random.sample(range(1, size+1), size)
         self.length = len(self.numbers)
 
     def importListFromFile(self, filename):
@@ -19,6 +19,16 @@ class NumberList(object):
         self.numbers = tempList
 
         f.close()
+		
+    def importListFromText(self, fileText):
+        fileText = fileText.decode("utf-8") 
+        fileText = fileText.replace(" ", "")
+        self.numbers = fileText.split(',')
+		
+        for i in range(len(self.numbers)):
+            self.numbers[i] = int(self.numbers[i])
+			
+        self.length = len(self.numbers)
 
     def exportListToFile(self, filename):
         file = open(filename,"w")
