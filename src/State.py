@@ -3,6 +3,10 @@ class State():
 
         self.data=NumberObj
         self.sorting = sorting
+        self.comparisons = int(comparisons)
+        self.movements = int(movements)
+        self.memoryUsage = float(memoryUsage)
+        self.runtime = float(runtime)
         self.speed=float(speed)
 
         #the rest of the data members start at zero.
