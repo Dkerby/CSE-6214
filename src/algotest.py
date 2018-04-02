@@ -73,7 +73,7 @@ def main(argv):
         if(arrsize<1 or arrsize>MAXARRAYSIZE):
                 print("Array inappropriately sized.")
                 sys.exit(2)
-        if(algochoice<1 or algochoice>4):
+        if(algochoice<1 or algochoice>5):
                 print("That is not one of the available algorithms")
                 sys.exit(2)
 

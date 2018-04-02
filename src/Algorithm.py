@@ -1,5 +1,5 @@
 from __future__ import print_function
-from sortlib import bubble_sort, insertion_sort, quick_sort, merge_sort
+from sortlib import bubble_sort, insertion_sort, quick_sort, merge_sort, heap_sort
 import tracemalloc
 import State as st #holds state of algorithm
 import NumberList as nl #holds the data
@@ -37,6 +37,8 @@ class Algorithm(object):
                         self.algo=quick_sort.QuickSort(self.status)
                 elif(algo==4):
                         self.algo=merge_sort.MergeSort(self.status)
+                elif(algo==5):
+                        self.algo=heap_sort.HeapSort(self.status)
 
 
 
@@ -66,6 +68,8 @@ class Algorithm(object):
                         self.algo=quick_sort.QuickSort(self.status)
                 elif(algo==4):
                         self.algo=merge_sort.MergeSort(self.status)
+                elif(algo==5):
+                        self.algo=heap_sort.HeapSort(self.status)
 
 
         #*****************************************************************************************
@@ -108,6 +112,10 @@ class Algorithm(object):
         def getFormat(self):
                 i=self.status.i if self.status.i<self.status.data.length-1 else 0
                 j=self.status.j if self.status.j<self.status.data.length-1 else 0
+                if(i<0):
+                        i=0
+                if(j<0):
+                        j=0
                 #INSERTION SORT FORMATTING
                 if(self.algochoice==1):
                         output=str(self.status.data.numbers[:j]) + '\x1b[0;37;41m' + str(self.status.data.numbers[j]) + '\x1b[0m' + str(self.status.data.numbers[j+1:i]) + '\x1b[0;30;44m' + str(self.status.data.numbers[i]) + '\x1b[0m' + str(self.status.data.numbers[i+1:])
@@ -142,6 +150,14 @@ class Algorithm(object):
                         highlights= '\x1b[0;37;41m' + str(self.status.data.numbers[j]) + '\x1b[0m' + '\x1b[0;30;44m' + str(self.status.data.numbers[j+1]) + '\x1b[0m'
                         posthighlights=str(self.status.data.numbers[j+2:])
                         output=prehighlights + highlights + posthighlights
+
+                #MERGE SORT FORMATTING  
+                elif(self.algochoice==5):
+                        element_i = '\x1b[0;37;41m' + str(self.status.data.numbers[i]) + '\x1b[0m'
+                        element_j = '\x1b[0;30;44m' + str(self.status.data.numbers[j]) + '\x1b[0m'
+
+                        output="DATA:\n\n"+ str(self.status.data.numbers[:i]) + element_i + str(self.status.data.numbers[i+1:j]) + element_j + str(self.status.data.numbers[j+1:])
+
 
                 else:
                         output=str(self.getData())

@@ -1,64 +1,145 @@
-'''
-This is a pure python implementation of the heap sort algorithm.
+class HeapSort(object):
 
-For doctests run following command:
-python -m doctest -v heap_sort.py
-or
-python3 -m doctest -v heap_sort.py
-
-For manual testing run:
-python heap_sort.py
-'''
-
-from __future__ import print_function
-
-
-def heapify(unsorted, index, heap_size):
-    largest = index
-    left_index = 2 * index + 1
-    right_index = 2 * index + 2
-    if left_index < heap_size and unsorted[left_index] > unsorted[largest]:
-        largest = left_index
-
-    if right_index < heap_size and unsorted[right_index] > unsorted[largest]:
-        largest = right_index
-
-    if largest != index:
-        unsorted[largest], unsorted[index] = unsorted[index], unsorted[largest]
-        heapify(unsorted, largest, heap_size)
+	def __init__(self, StateObj):
+		self.firstStep=True
+		self.status=StateObj
+		self.status.i=self.status.data.length//2-1
+		self.lines=[]
+		self.lines.append("def heapify(array, index, heap_size):")
+		self.lines.append("\n\tlargest = index\n\tleft_index = 2 * index + 1\n\tright_index = 2 * index + 2")
+		self.lines.append("\n\tif left_index < heap_size and array[left_index] > array[largest]:\n\t\tlargest = left_index\n\tif right_index < heap_size and array[right_index] > array[largest]:\n\t\tlargest = right_index\n\tif largest != index:\n\t\tarray[largest], array[index] = array[index], array[largest]\n\t\theapify(array, largest, heap_size)")
+		self.lines.append("\n")
+		self.lines.append("\ndef heapsort(array):")
+		self.lines.append("\n\tn = len(array)")
+		self.lines.append("\n\tfor i in range(n // 2 - 1, -1, -1):\n\t\theapify(array, i, n)")
+		self.lines.append("\n\tfor j in range(n - 1, 0, -1):\n\t\tarray[0], array[j] = array[j], array[0]\n\t\theapify(array, 0, j)")
+		self.lines.append("\n\treturn array")
 
 
-def heap_sort(unsorted):
-    '''
-    Pure implementation of the heap sort algorithm in Python
-    :param collection: some mutable ordered collection with heterogeneous
-    comparable items inside
-    :return: the same collection ordered by ascending
+	def iterate(self):
 
-    Examples:
-    >>> heap_sort([0, 5, 3, 2, 2])
-    [0, 2, 2, 3, 5]
+		#reset the initial values just in case sorting array was changed before 
+		#the first step
+		if(self.firstStep):
+			self.firstStep=False
+			self.status.i=self.status.data.length//2-1
+			self.status.j=self.status.data.length-1
+			self.largest=self.status.i
+			self.left_index=2*self.status.i+1
+			self.right_index=2*self.status.i+2
+			self.do_iteration=True
+			self.status.currentLine=9
+			return
 
-    >>> heap_sort([])
-    []
+		#first for-loop
+		if(self.status.i>=0):
 
-    >>> heap_sort([-2, -5, -45])
-    [-45, -5, -2]
-    '''
-    n = len(unsorted)
-    for i in range(n // 2 - 1, -1, -1):
-        heapify(unsorted, i, n)
-    for i in range(n - 1, 0, -1):
-        unsorted[0], unsorted[i] = unsorted[i], unsorted[0]
-        heapify(unsorted, 0, i)
-    return unsorted
+			#this construction is basically like a toggle
+			#for doing a recursive heapify versus a for-loop heapify
+			if(self.do_iteration):
+				self.index=self.status.i
+			else:
+				self.index=self.largest
 
-if __name__ == '__main__':
-    try:
-        raw_input          # Python 2
-    except NameError:
-        raw_input = input  # Python 3
 
-    user_input = raw_input('Enter numbers separated by a comma:\n').strip()
-    unsorted = [int(item) for item in user_input.split(',')]
-    print(heap_sort(unsorted))
+			#set some variables
+			self.largest=self.index
+			self.left_index=2*self.index+1
+			self.right_index=2*self.index+2
+			self.status.compares+=3
+
+
+			#if left_index<size and array[left_index]>array[largest]
+			if(self.left_index < self.status.data.length and self.status.data.numbers[self.left_index] > self.status.data.numbers[self.largest]):
+				self.largest=self.left_index
+
+			#if right_index<size and array[right_index]>array[largest]
+			if(self.right_index < self.status.data.length and self.status.data.numbers[self.right_index] > self.status.data.numbers[self.largest]):
+				self.largest=self.right_index
+			
+			#if largest!=index	
+			if(self.largest != self.index):
+				#swap array[largest] and array[index]
+				self.status.data.numbers[self.largest], self.status.data.numbers[self.index] = self.status.data.numbers[self.index], self.status.data.numbers[self.largest]
+
+				#increment data movements
+				self.status.swaps+=1
+			
+				#this is basically "heapify(array, largest, size)"
+				self.do_iteration=False
+
+				#set current pseudocode line
+				self.status.currentLine=2
+
+			#if largest==index
+			else:
+
+				#go back to the for-loop and decrement i
+				self.do_iteration=True
+				self.status.i-=1
+
+				#set pseudocode line
+				self.status.currentLine=6
+
+
+
+		#second for-loop
+		elif(self.status.j>0):
+
+			#this construction is basically like a toggle
+			#for doing a recursive heapify versus a for-loop heapify
+			if(self.do_iteration):
+				self.status.data.numbers[0], self.status.data.numbers[self.status.j] = self.status.data.numbers[self.status.j], self.status.data.numbers[0]
+				self.index=0
+				self.status.swaps+=1
+			else:
+				self.index=self.largest
+
+
+			#set some variable values			
+			self.largest=self.index
+			self.left_index=2*self.index+1
+			self.right_index=2*self.index+2
+			self.status.compares+=3
+		
+			#if left_index<size and array[left_index]>array[largest]
+			#size=j for this loop
+			if(self.left_index < self.status.j and self.status.data.numbers[self.left_index] > self.status.data.numbers[self.largest]):
+				self.largest=self.left_index
+
+			#if right_index<size and array[right_index]>array[largest]
+			#size=j for this loop
+			if(self.right_index < self.status.j and self.status.data.numbers[self.right_index] > self.status.data.numbers[self.largest]):
+				self.largest=self.right_index
+
+			#if largest!=index
+			if(self.largest != self.index):
+
+				#swap array[largest] and array[index]
+				self.status.data.numbers[self.largest], self.status.data.numbers[self.index] = self.status.data.numbers[self.index], self.status.data.numbers[self.largest]
+
+				#increment data movements
+				self.status.swaps+=1
+
+				#set the pseudocode line
+				self.status.currentLine=2
+
+				#toggle the recursive heapify call
+				self.do_iteration=False
+
+			#if largest==index
+			else:
+
+				#set the pseudocode line
+				self.status.currentLine=7
+
+				#decrement j and go back to the for-loop
+				self.do_iteration=True
+				self.status.j-=1
+
+		#sort is done
+		else:
+			self.status.sorting=False
+			self.status.currentLine=8
+			self.status.i=0
+			self.status.j=1

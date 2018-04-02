@@ -15,11 +15,16 @@ class InsertionSort(object):
 		self.status.i=1
 		self.status.j=1
 		self.cval=self.status.data.numbers[self.status.i]
+		self.firstStep=True
 		self.lines=[]
 		self.lines.append("\nfor i in range(1, len(array)):")
 		self.lines.append("\n\twhile 0 < index and array[index] < array[index - 1]:\n\t\tarray[index], array[index - 1] = array[index - 1], array[index]\n\t\tindex -= 1")
 
 	def iterate(self):
+
+		if(self.firstStep):
+			self.firstStep=False
+			self.cval=self.status.data.numbers[self.status.i]
 		
 		# if ( j > 0 && array[j-1] > cval ):
 		if(self.status.j>0 and self.status.data.numbers[self.status.j-1]>self.cval):
