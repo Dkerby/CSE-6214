@@ -115,17 +115,33 @@ def main(argv):
                                         output+= '\x1b[0;37;41m' + line + '\x1b[0m'
                                 else:
                                         output+=line
-                        
-                        #clear stdout
-                        os.system('clear')
-
-                        #print to cmdline
-                        print(output)
 
 
-                        #this is where the -w option comes into play
-                        if(wait):
-                                input("<hit enter to step>")
+                        if(not state.sorting and state.benchmarking):
+                                input("\n<hit enter to display results>")
+                                output=""
+                                output+="BENCHMARK SORT RESULTS:\n"
+                                output+="\nComparisons:\t"+str(state.compares)
+                                output+="\nMovements:\t"+str(state.swaps)
+                                output+="\nMemory Used:\t"+str(state.maxmem)+" Bytes"
+                                output+="\nRuntime: \t"+str("{0:.2f}".format(state.runtime))+" Seconds\n\n"
+                                #clear stdout
+                                os.system('clear')
+
+                                #print to cmdline
+                                print(output)
+                                input("<hit enter to continue>")
+                        elif(state.sorting):
+
+                                #clear stdout
+                                os.system('clear')
+
+                                #print to cmdline
+                                print(output)
+
+                                #this is where the -w option comes into play
+                                if(wait):
+                                        input("<hit enter to step>")
         else:
                 while(state.sorting):
 
