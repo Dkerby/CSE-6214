@@ -68,7 +68,6 @@ class MergeSort(object):
 			self.splitStack=[self.status.data.numbers]
 			self.mergeStack=[]
 			self.mergeArray=[]
-			return
 
 		#an abstraction to reduce complexity
 		splitStack=self.splitStack

@@ -57,7 +57,6 @@ class QuickSort(object):
 
 			#pivot defaults to last element of subarray
 			self.p=(len(self.status.data.numbers)-1)
-			return
 
 
 		#if the subarray is not sorted
