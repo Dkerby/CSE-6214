@@ -16,7 +16,9 @@ class NumberList(object):
         line = f.readline()
         line = line.replace(" ", "")
         tempList = line.split(',')
-        self.numbers = tempList
+        self.numbers=[]
+        for num in tempList:
+            self.numbers.append(int(num))
 
         f.close()
 		
@@ -32,8 +34,12 @@ class NumberList(object):
 
     def exportListToFile(self, filename):
         file = open(filename,"w")
-
+        first=True
         for num in self.numbers:
-            file.write(str(num) + ',')
+            if(first):
+                file.write(str(num))
+                first=False
+            else:
+                file.write(', ' + str(num))
 
         file.close()

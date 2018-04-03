@@ -28,7 +28,7 @@ class HeapSort(object):
 			self.left_index=2*self.status.i+1
 			self.right_index=2*self.status.i+2
 			self.do_iteration=True
-			self.status.currentLine=9
+			self.status.currentLine=4
 			return
 
 		#first for-loop

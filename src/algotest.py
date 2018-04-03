@@ -19,12 +19,13 @@ def main(argv):
         algochoice=1
         MAXARRAYSIZE=2048
         wait=False
+        benchmark=False
         speed=0.05
 
         
         #parsing of command line options
         try:
-                opts, args = getopt.getopt(argv,"hwr:a:s:",["randnum=", "algo=", "spd="])
+                opts, args = getopt.getopt(argv,"bhwr:a:s:",["randnum=", "algo=", "spd="])
 
         #error prints out the help info
         except getopt.GetoptError:
@@ -67,6 +68,9 @@ def main(argv):
                 # -w is a toggle on the <press enter to step> portion of the output
                 elif opt =="-w":
                         wait=True
+
+                elif opt=="-b":
+                        benchmark=True
         
 
         #print error and exit if the user's options are silly
@@ -89,39 +93,73 @@ def main(argv):
         x=alg.Algorithm(True, algochoice, speed, arrsize) #pass State object into Algorithm along with the choice of algorithm
         state=x.getState()
         #while algorithm is not complete, keep on steppin'
-
-        while(state.sorting):
-
-                #step it up!
-                x.step()
-                state=x.getState()
-                output=x.getFormat()
-
-                #ADD I, J, SWAP, AND COMPARISON DATA TO OUTPUT
-                output+="\n\ni:\t\t"+str(state.i)
-                output+="\nj:\t\t"+str(state.j)
-                output+="\nComparisons:\t"+str(state.compares)
-                output+="\nMovements:\t"+str(state.swaps)
-                output+="\nMemory Used:\t"+str(state.memUsage)+" Bytes\n\n"
-
-
-		#Higlighting the pseudocode
-                for line in x.algo.lines:
-                        if (x.algo.lines[state.currentLine]==line):
-                                output+= '\x1b[0;37;41m' + line + '\x1b[0m'
-                        else:
-                                output+=line
-                
-                #clear stdout
-                os.system('clear')
-
-                #print to cmdline
-                print(output)
+        if(benchmark):
+                x.benchsetup(arrsize)
+                while(state.benchmarking):
+                        x.benchstep()
+                        state=x.getState()
+                        output=x.getFormat()
+                        
+                        #ADD I, J, SWAP, AND COMPARISON DATA TO OUTPUT
+                        output+="\n\ni:\t\t"+str(state.i)
+                        output+="\nj:\t\t"+str(state.j)
+                        output+="\nComparisons:\t"+str(state.compares)
+                        output+="\nMovements:\t"+str(state.swaps)
+                        output+="\nMemory Used:\t"+str(state.memUsage)+" Bytes"
+                        output+="\nRuntime: \t"+str("{0:.2f}".format(state.runtime))+" Seconds\n\n"
 
 
-                #this is where the -w option comes into play
-                if(wait):
-                        input("<hit enter to step>")
+                        #Higlighting the pseudocode
+                        for line in x.algo.lines:
+                                if (x.algo.lines[state.currentLine]==line):
+                                        output+= '\x1b[0;37;41m' + line + '\x1b[0m'
+                                else:
+                                        output+=line
+                        
+                        #clear stdout
+                        os.system('clear')
+
+                        #print to cmdline
+                        print(output)
+
+
+                        #this is where the -w option comes into play
+                        if(wait):
+                                input("<hit enter to step>")
+        else:
+                while(state.sorting):
+
+                        #step it up!
+                        x.step()
+                        state=x.getState()
+                        output=x.getFormat()
+
+                        #ADD I, J, SWAP, AND COMPARISON DATA TO OUTPUT
+                        output+="\n\ni:\t\t"+str(state.i)
+                        output+="\nj:\t\t"+str(state.j)
+                        output+="\nComparisons:\t"+str(state.compares)
+                        output+="\nMovements:\t"+str(state.swaps)
+                        output+="\nMemory Used:\t"+str(state.memUsage)+" Bytes"
+                        output+="\nRuntime: \t"+str("{0:.2f}".format(state.runtime))+" Seconds\n\n"
+
+
+                        #Higlighting the pseudocode
+                        for line in x.algo.lines:
+                                if (x.algo.lines[state.currentLine]==line):
+                                        output+= '\x1b[0;37;41m' + line + '\x1b[0m'
+                                else:
+                                        output+=line
+                        
+                        #clear stdout
+                        os.system('clear')
+
+                        #print to cmdline
+                        print(output)
+
+
+                        #this is where the -w option comes into play
+                        if(wait):
+                                input("<hit enter to step>")
 
 
 

@@ -27,6 +27,9 @@ class Algorithm(object):
                 self.status.data.generateRandom(arrsize)
                 #holds the choice of algorithm
                 self.algochoice=algo
+                self.benchindex=0
+                self.cachefile="sortcache.txt"
+                self.outputfile=""
 
                 #switchcase for algorithm choice
                 if(algo==1):
@@ -50,7 +53,6 @@ class Algorithm(object):
                 length=self.status.data.length
                 self.status=st.State(nl.NumberList(),True, self.status.speed)
                 self.status.data.generateRandom(length)
-                self.data.generateRandom(self.data.length)
 
                 #holds potentially new algochoice
                 if(algo!=0):
@@ -173,12 +175,149 @@ class Algorithm(object):
                 if(self.status.sorting):                
                         
                         #self.algo is an instance of whatever sorting algorithm we're using's class
+                        initialtime=time.time()
                         self.algo.iterate()
                         snapshot=tracemalloc.take_snapshot()
                         filters=[tracemalloc.Filter(True, "*sort.py")]
                         filtered_snap=snapshot.filter_traces(filters)
                         stats=filtered_snap.statistics('filename')
                         self.status.memUsage=stats[0].size
+                        if(self.status.maxmem<self.status.memUsage):
+                                self.status.maxmem=self.status.memUsage
                         time.sleep(self.status.speed)
+                        deltatime=time.time() - initialtime
+                        self.status.runtime+=deltatime
+
+
+
+
+        #*****************************************************************************************
+        # SETUP THE ALGORITHM OBJECT FOR BENCHMARKING
+        
+        def benchsetup(self, randsize=200, inputfile="", outputfile="benchmark.log"):
+
+                #set outputfile
+                self.outputfile=outputfile
+
+                #if user wants to import a file with data, this will allow it
+                if(inputfile!=""):
+                        self.importData(inputfile)
+
+                else:
+                        self.setRandomData(randsize)
+
+
+                #keep unsorted data in the cachefile so the sorts can be reset
+                self.exportData(self.cachefile)
+
+                #output the inital unsorted array to the outputfile
+                of=open(self.outputfile,"w")
+                of.write("Initial Data: \n")
+
+                first=True
+                for num in self.status.data.numbers:
+                        if(first):
+                                of.write(str(num))
+                                first=False
+                        else:
+                                of.write(', ' + str(num))
+                                
+                of.write("\n\n")
+                of.close()
+
+                #set benchmark index to 1. this starts it at algochoice=1
+                self.benchindex=1
+
+
+        #*****************************************************************************************
+        # BENCHMARK STEP ONCE
+        
+        def benchstep(self):
                 
+                #do each sort, one after another
+                if(self.status.sorting):
+
+                        #step if the sort is in progress
+                        self.step()
+
+                #if the individual sort is not in progress
+                else:
+
+                        #if there are still more individual sorts to do
+                        if(self.benchindex<5):
+
+                                #output metadata to outputfile
+                                of=open(self.outputfile,"a")
+                                of.write("Sort Used: \t\t")
+                                if(self.algochoice==1):
+                                        of.write("Insertion Sort\n")
+                                elif(self.algochoice==2):
+                                        of.write("Bubble Sort\n")
+                                elif(self.algochoice==3):
+                                        of.write("Quick Sort\n")
+                                elif(self.algochoice==4):
+                                        of.write("Merge Sort\n")
+                                elif(self.algochoice==5):
+                                        of.write("Heap Sort\n")
+                                else:
+                                        of.write("Unknown\n")
+
+                                of.write("Data Movements: \t" + str(self.status.swaps) + "\n")
+                                of.write("Data Comparisons: \t" + str(self.status.compares) + "\n")
+                                of.write("Memory Used: \t\t" + str(self.status.maxmem) + " Bytes\n")
+                                of.write("Runtime: \t\t"+str("{0:.2f}".format(self.status.runtime))+" Seconds\n")
+                                of.write("\n")
+                                of.close()
+
+                                #increment benchindex
+                                self.benchindex+=1
+
+                                #reset the sort
+                                self.reset(self.benchindex)
+
+                                #import unsorted data from cachefile
+                                self.importData(self.cachefile)
+
+                                
+
+                        #if the benchmark has done each algorithm
+                        else:
+
+                                #output the last sorts metadata to outputfile
+                                of=open(self.outputfile,"a")
+                                of.write("Sort Used: \t\t")
+                                if(self.algochoice==1):
+                                        of.write("Insertion Sort\n")
+                                elif(self.algochoice==2):
+                                        of.write("Bubble Sort\n")
+                                elif(self.algochoice==3):
+                                        of.write("Quick Sort\n")
+                                elif(self.algochoice==4):
+                                        of.write("Merge Sort\n")
+                                elif(self.algochoice==5):
+                                        of.write("Heap Sort\n")
+                                else:
+                                        of.write("Unknown\n")
+
+                                of.write("Data Movements: \t" + str(self.status.swaps) + "\n")
+                                of.write("Data Comparisons: \t" + str(self.status.compares) + "\n")
+                                of.write("Memory Used: \t\t" + str(self.status.maxmem) + " Bytes\n")
+                                of.write("Runtime: \t\t"+str("{0:.2f}".format(self.status.runtime))+" Seconds\n")
+                                of.write("\n")
+
+                                #output the sorted data to outputfile to make
+                                #sure that the data sorted correctly
+                                of.write("\nSorted Data: \n")
+                                first=True
+                                for num in self.status.data.numbers:
+                                        if(first):
+                                                of.write(str(num))
+                                                first=False
+                                        else:
+                                                of.write(', ' + str(num))
+
+                                of.close()
+
+                                #stop benchmarking
+                                self.status.benchmarking=False
 

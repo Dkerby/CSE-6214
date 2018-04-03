@@ -3,6 +3,7 @@ class State():
 
         self.data=NumberObj
         self.sorting = sorting
+        self.benchmarking=True
         self.speed=float(speed)
 
         #the rest of the data members start at zero.
@@ -11,6 +12,7 @@ class State():
         self.compares = 0
         self.swaps = 0
         self.memUsage = float(0.0)
+        self.maxmem=float(0.0)
         self.runtime = float(0.0)
         self.i=0
         self.j=0
