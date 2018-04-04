@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import os,sys, getopt 
+import os,sys, getopt, platform
 #os used for clearing the cmdline output, 
 #sys and geopt used for cmdline arguments
 
@@ -151,7 +151,10 @@ def main(argv):
                                         output+=line
                         
                         #clear stdout
-                        os.system('clear')
+                        if(platform.system() == "Windows"):
+                                os.system("CLS")
+                        else:
+                                os.system('clear')
 
                         #print to cmdline
                         print(output)
