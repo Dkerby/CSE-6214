@@ -14,6 +14,7 @@ class BubbleSort(object):
 
 	def __init__(self, StateObj):
 		self.status=StateObj
+		self.firstStep=True
 		self.lines=[]
 		self.lines.append("\nfor i in range(len(array)):")
 		self.lines.append("\n\tfor j in range(len(array)-1):")
@@ -22,11 +23,15 @@ class BubbleSort(object):
 
 
 	def iterate(self):
-		
-		arrLength=self.status.data.length
-		if(self.status.i<arrLength):
+		if(self.firstStep):
+			self.firstStep=False
+			arrLength=self.status.data.length
+			self.status.i=arrLength-1
+			self.status.j=0
 
-			if(self.status.j<(arrLength-self.status.i-1)):
+		if(self.status.i>=0):
+
+			if(self.status.j<self.status.i):
 				if(self.status.data.numbers[self.status.j]>self.status.data.numbers[self.status.j+1]):
 					self.status.data.numbers[self.status.j], self.status.data.numbers[self.status.j+1] = self.status.data.numbers[self.status.j+1], self.status.data.numbers[self.status.j]
 					
@@ -46,7 +51,7 @@ class BubbleSort(object):
 
 			else:
 				self.status.j=0
-				self.status.i+=1
+				self.status.i-=1
 				self.status.currentLine=1
 		else:
 			self.status.i=0

@@ -66,9 +66,15 @@ var psudocode = {
 	"</br>for i in range(1, len(array)):",
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while 0 < index and array[index] < array[index - 1]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[index], array[index - 1] = array[index - 1], array[index]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index -= 1"
 	], "Heap": [
-	"Line of",
-	"Psudocode for",
-	"Heapsort"
+	"def heapify(array, index, heap_size):",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left_index = 2 * index + 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;right_index = 2 * index + 2",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if left_index < heap_size and array[left_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = left_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if right_index < heap_size and array[right_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = right_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if largest != index:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[largest], array[index] = array[index], array[largest]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, largest, heap_size)",
+	"",
+	"def heapsort(array):",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n = len(array)",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for i in range(n // 2 - 1, -1, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, i, n)",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in range(n - 1, 0, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[0], array[j] = array[j], array[0]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, 0, j)",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return array"
 	], "Quick": [
 	"if( len(array) <= 1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return",
 	"else:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pivot = len(array)-1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i=0",
@@ -77,6 +83,10 @@ var psudocode = {
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i++</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[i], j = j, array[i]",
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[i+1], array[pivot] = array[pivot], array[i+1]",
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QuickSort(array[:i+1])</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QuickSort(array[i+2:])"
+	], "Default": [
+	"Lines of",
+	"Psudocode for",
+	"Sorting go here"
 	],
 }
 
@@ -174,7 +184,7 @@ function play() {
 		sortData.choice = 5
 		break;
 	case 'Quick':
-		sortData.choice = 5;
+		sortData.choice = 3;
 		break;
 	}
 	
@@ -213,7 +223,7 @@ function highlightLine(line) {
 }
 
 function stop() {
-	document.getElementById('play').innerHTML = "Play";
+	document.getElementById('play').innerHTML = "Start";
 	document.getElementById('play').onclick = play;
 	document.getElementById('pause').style.opacity = "0";
 	playing = false;
@@ -222,11 +232,13 @@ function stop() {
 function pause() {
 	if(playing) {
 		playing = false;
-		document.getElementById('pause').innerHTML = "Play";
+		document.getElementById('pause').innerHTML = "Resume";
+		document.getElementById('step').style.opacity = "1";
 	} else {
 		playing = true;
 		socket.emit("step");
 		document.getElementById('pause').innerHTML = "Pause";
+		document.getElementById('step').style.opacity = "0";
 	}
 }
 
@@ -287,8 +299,9 @@ function updateState(state) {
 						</div>
 						
 						<div style="margin-left:10%">
-							<button id="play" class="mui-btn mui-btn--primary" onclick="play()" style="margin-top:20px;"> Play </button>
+							<button id="play" class="mui-btn mui-btn--primary" onclick="play()" style="margin-top:20px;"> Start </button>
 							<button id="pause" class="mui-btn mui-btn--primary" onclick="pause()" style="opacity:0; margin-top:20px;"> Pause </button>
+							<button id="step" class="mui-btn mui-btn--primary" onclick="socket.emit('step')" style="opacity:0; margin-top:20px;"> Step </button>
 						</div>
 					</div>
 					
@@ -299,7 +312,7 @@ function updateState(state) {
 							</div>
 						</div>
 						<script>
-							showPsudocode("Merge");
+							showPsudocode("Default");
 						</script>
 						<div style="width:60%;margin-left:5%;">
 							<canvas id="numbers" style="max-height:45vh;min-width:100%;">

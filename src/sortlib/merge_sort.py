@@ -38,6 +38,7 @@ class MergeSort(object):
 	"""
 	def __init__(self, StateObj):
 		self.status=StateObj
+		self.firstStep=True
 		self.status.i=0
 		self.status.j=0
 		self.relative_i=0
@@ -57,6 +58,16 @@ class MergeSort(object):
 		self.lines.append("\n\tarray[k] = right_half[j]\n\tj += 1\n\tk += 1")
 
 	def iterate(self):
+
+		if(self.firstStep):
+			self.firstStep=False
+			self.status.i=0
+			self.status.j=0
+			self.relative_i=0
+			self.relative_j=0
+			self.splitStack=[self.status.data.numbers]
+			self.mergeStack=[]
+			self.mergeArray=[]
 
 		#an abstraction to reduce complexity
 		splitStack=self.splitStack
