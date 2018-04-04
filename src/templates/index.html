@@ -45,6 +45,7 @@ socket.on('doneSorting', function() {
 var sort = "Merge";
 var file = "";
 var playing = false;
+var speed="Medium";
 
 var psudocode = {
 	"Merge": [
@@ -94,6 +95,11 @@ function chooseAlgorithm(choice) {
 	document.getElementById("algorithm").innerHTML = choice + " Sort";
 	sort = choice;
 	showPsudocode(choice);
+}
+
+function setSpeed(choice) {
+	document.getElementById("speed").innerHTML = choice;
+	speed = choice;
 }
 
 var barChart;
@@ -187,6 +193,21 @@ function play() {
 		sortData.choice = 3;
 		break;
 	}
+
+	switch(speed){
+	case 'Slow':
+		sortData.speed=0.05;
+		break;
+	case 'Medium':
+		sortData.speed=0.025;
+		break;
+	case 'Fast':
+		sortData.speed=0.001;
+		break;
+	case 'Ludicrous Speed':
+		sortData.speed=0.0;
+		break;
+	}
 	
 	if (file) sortData.file = file;
 	else sortData.size = parseInt(document.getElementById("sizeSlider").value);
@@ -250,6 +271,7 @@ function updateState(state) {
 	document.getElementById("compares").innerHTML = state.compares;
 	document.getElementById("swaps").innerHTML = state.swaps;
 	document.getElementById("memory").innerHTML = state.memUsage;
+	document.getElementById("runtime").innerHTML = state.runtime;
 }
 	</script>
 
@@ -268,18 +290,32 @@ function updateState(state) {
 				<div>
 					<p id="error" style="color:red"></p>
 					<div id="inputs" style="display:inline-flex;width:85%;border-style:solid;border-color:midnightblue;padding:5px 5%;margin-bottom: 10px;">
-						<div>
+						<div style="position:relative;">
 							<h2> Choose Algorithm </h2>
 							<button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
 								<span id="algorithm"> Merge Sort </span>
 								<span class="mui-caret"></span>
 							</button>
-							<ul class="mui-dropdown__menu">
+							<ul class="mui-dropdown__menu" style="position:absolute;">
 							<li class="option" onclick="chooseAlgorithm('Merge')">Merge Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Bubble')">Bubble Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Insertion')">Insertion Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Heap')">Heap Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Quick')">Quick Sort</li>
+							</ul>
+						</div>
+
+						<div style="margin-left:10%;position:relative">
+							<h2> Choose Speed </h2>
+							<button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
+								<span id="speed"> Medium </span>
+								<span class="mui-caret"></span>
+							</button>
+							<ul class="mui-dropdown__menu" style="position:absolute;margin:0;padding:0;">
+							<li class="option" onclick="setSpeed('Slow')">Slow</li>
+							<li class="option" onclick="setSpeed('Medium')">Medium</li>
+							<li class="option" onclick="setSpeed('Fast')">Fast</li>
+							<li class="option" onclick="setSpeed('Ludicrous Speed')">Ludicrous Speed</li>
 							</ul>
 						</div>
 						
@@ -320,7 +356,8 @@ function updateState(state) {
 							<div id="stats" style="opacity:0;text-align:center">
 								<h3> <b>Compares:</b> <span id="compares"></span> </h3>
 								<h3> <b>Swaps:</b> <span id="swaps"></span> </h3>
-								<h3> <b>Memory Usage:</b> <span id="memory"></span> </h3>
+								<h3> <b>Memory Usage:</b> <span id="memory"></span> Bytes </h3>
+								<h3> <b>Runtime:</b> <span id="runtime"></span> Seconds </h3>
 							</div>
 						</div>
 					</div>
