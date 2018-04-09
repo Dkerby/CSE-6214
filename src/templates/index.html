@@ -42,9 +42,22 @@ socket.on('doneSorting', function() {
 	highlightLine(-1);
 });
 
+socket.on('benchmarks', function(state) {
+	updateBenchmarkChart(state);
+	document.getElementById("stats").style.opacity = 0;
+	if(!state.sorting) {
+		algorithm++; 
+		algorithmName = algorithms[algorithm];
+	}
+	if (playing) socket.emit("benchmark");
+});
+
 var sort = "Merge";
 var file = "";
 var playing = false;
+var algorithm = 1;
+var algorithms = ["", "Insertion Sort", "Bubble Sort", "Quick Sort", "Merge Sort", "Heap Sort"];
+var algorithmName = algorithms[algorithm];
 
 var psudocode = {
 	"Merge": [
@@ -91,9 +104,13 @@ var psudocode = {
 }
 
 function chooseAlgorithm(choice) {
-	document.getElementById("algorithm").innerHTML = choice + " Sort";
+	if (choice != "Benchmark") {
+		document.getElementById("algorithm").innerHTML = choice + " Sort";
+	} else {
+		document.getElementById("algorithm").innerHTML = "Run Benchmarks";
+	}
 	sort = choice;
-	showPsudocode(choice);
+	if(!playing) showPsudocode(choice);
 }
 
 var barChart;
@@ -149,6 +166,67 @@ label: function(tooltipItem) {
 	}
 }
 
+
+function updateBenchmarkChart(state) {
+	var ctx = document.getElementById("numbers");
+	if (!algorithmName) return;
+	
+	var colors = ["purple", "rgb(19, 54, 112)", "rgb(167, 184, 214)", "rgb(10, 22, 43)", "rgb(91, 125, 183)", "rgb(5, 69, 178)"];
+	var color = colors[algorithm];
+	
+	if(!barChart) {
+		var data = {
+			label: algorithmName,
+			data: [state.swaps, state.compares, state.memUsage, state.runtime],
+			backgroundColor: color
+		};
+		
+		barChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: ["swaps", "compares", "memory", "runtime"],
+			datasets: [data]
+		}, 
+		options: {	
+			animation: {
+				duration: 0
+			},
+			legend: {
+				display: true
+			},
+			scales: {
+            yAxes: [{
+                type: 'linear'
+            }]},
+		tooltips: {
+		callbacks: {
+		label: function(tooltipItem) {
+			return tooltipItem.yLabel;
+						}
+					}
+				}
+			}, 
+		});	
+	} else {
+		var list = [state.swaps, state.compares, state.memUsage, state.runtime];
+		var label = algorithmName;
+		if (barChart.data.datasets.length-1 < algorithm-1) {
+			barChart.data.datasets.push( {
+			label: label,
+			data: [state.swaps, state.compares, state.memUsage, state.runtime],
+			backgroundColor: color
+			});
+		}
+		
+		for (var i in list) {
+			barChart.data.datasets[algorithm-1].data[i] = list[i];
+		}
+		barChart.data.labels = ["swaps", "compares", "memory", "runtime"];
+		
+		barChart.update();
+	}
+}
+
 function fileUploaded(fileLoaded) {
 	if(fileLoaded.name.substring(fileLoaded.name.length-4) != ".txt") {
 		document.getElementById("error").innerHTML = "Only .txt files are supported";
@@ -161,10 +239,12 @@ function fileUploaded(fileLoaded) {
 }
 
 function play() {
+	showPsudocode(sort);
+	algorithm = 1;
+	
 	if(barChart) {
-		barChart.data.datasets[0].data = [];
-		barChart.data.datasets[0].backgroundColor = [];
-		barChart.data.labels = [];
+		 barChart.destroy();
+		 barChart = false;
 	}
 	
 	document.getElementById("stats").style.opacity = "1";
@@ -186,20 +266,34 @@ function play() {
 	case 'Quick':
 		sortData.choice = 3;
 		break;
+	case 'Benchmark':
+		sortData.choice = -1;
+		break;
 	}
 	
 	if (file) sortData.file = file;
 	else sortData.size = parseInt(document.getElementById("sizeSlider").value);
-	socket.emit('startSorting', sortData);
+	
 	document.getElementById('play').innerHTML = "Stop";
 	document.getElementById('play').onclick = stop;
-	document.getElementById('pause').style.opacity = "1";
-	document.getElementById('pause').innerHTML = "Pause";
-	showPsudocode(sort);
+	if (sortData.choice > 0) {
+		socket.emit('startSorting', sortData);
+		document.getElementById('pause').style.opacity = "1";
+		document.getElementById('pause').innerHTML = "Pause";
+	} else {
+		socket.emit('startBenchmarks', sortData);
+	}
 }
 
 function showPsudocode(sort) {
+	if (sort == "Benchmark") {
+		document.getElementById("psudocode-container").style.display = "none";
+		return;
+	}
+	
+	document.getElementById("psudocode-container").style.display = "block";
 	document.getElementById("psudocode").innerHTML = "";
+	
 	for(var line in psudocode[sort]) {
 		var code = document.createElement("p");
 		code.innerHTML = psudocode[sort][line];
@@ -274,12 +368,13 @@ function updateState(state) {
 								<span id="algorithm"> Merge Sort </span>
 								<span class="mui-caret"></span>
 							</button>
-							<ul class="mui-dropdown__menu">
+							<ul class="mui-dropdown__menu" style="margin-left:15%;padding-left:5px;">
 							<li class="option" onclick="chooseAlgorithm('Merge')">Merge Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Bubble')">Bubble Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Insertion')">Insertion Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Heap')">Heap Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Quick')">Quick Sort</li>
+							<li class="option" onclick="chooseAlgorithm('Benchmark')">Run Benchmarks </li>
 							</ul>
 						</div>
 						
@@ -306,7 +401,7 @@ function updateState(state) {
 					</div>
 					
 					<div style="display:inline-flex;margin-left:5%;width:100%;">
-						<div>
+						<div id="psudocode-container">
 							<h3 style="text-align:center"> Psudocode: </h3>
 							<div id="psudocode" style="min-width:25%;">
 							</div>
