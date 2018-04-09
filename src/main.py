@@ -47,7 +47,7 @@ def startSorting(data):
 	global state
 	global algorithm
 
-	algorithm=alg.Algorithm(True, data['choice'])
+	algorithm=alg.Algorithm(True, data['choice'], data['speed'])
 	
 	if('file' in data.keys()):
 		algorithm.importText(data['file']);
@@ -56,7 +56,7 @@ def startSorting(data):
 
 	state=algorithm.getState()
 
-	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':str("{0:.1f}".format(state.runtime)), 'currentLine':state.currentLine})
 
 @socketio.on('startBenchmarks')
 def startBenchmarks(data):
@@ -86,7 +86,7 @@ def step():
 		emit('doneSorting')
 	else:
 		algorithm.step()
-		emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
+		emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':str("{0:.1f}".format(state.runtime)), 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
 
 @socketio.on('browserEvent')
 def browser_event(eventMsg):
