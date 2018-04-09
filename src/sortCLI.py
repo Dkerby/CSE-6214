@@ -25,7 +25,7 @@ def main(argv):
         
         #parsing of command line options
         try:
-                opts, args = getopt.getopt(argv,"bhwr:a:s:",["randnum=", "algo=", "spd="])
+                opts, args = getopt.getopt(argv,"bhwf:r:a:s:",["filename=", "randnum=", "algo=", "spd="])
 
         #error prints out the help info
         except getopt.GetoptError:
@@ -57,6 +57,20 @@ def main(argv):
                 elif opt in ("-r", "--randnum"):
                         arrsize = int(arg)
 
+                elif opt=="-f":
+                        arrsize = 0
+                        numList = []
+                        f = open(arg, "r")
+                        line = f.readline()
+                        for u in line.split():
+                            numList.append(u)
+                            arrsize = arrsize + 1
+
+                        #creates NumberList, State, and Algorithm objects
+                        x=alg.Algorithm(True, algochoice, speed, arrsize) #pass State object into Algorithm along with the choice of algorithm
+                        x.setData(numList)
+                        state=x.getState()
+
                 # -a lets the user choose which algorithm they want to do
                 elif opt in ("-a", "--algo"):
                         algochoice = int(arg)
@@ -71,8 +85,12 @@ def main(argv):
 
                 elif opt=="-b":
                         benchmark=True
+                
+                    
         
-
+        #creates NumberList, State, and Algorithm objects
+        x=alg.Algorithm(True, algochoice, speed, arrsize) #pass State object into Algorithm along with the choice of algorithm
+        state=x.getState()
         #print error and exit if the user's options are silly
         if(arrsize<1 or arrsize>MAXARRAYSIZE):
                 print("Array inappropriately sized.")
@@ -88,10 +106,6 @@ def main(argv):
         print('Generating array of size', arrsize)
         print('Algorithm choice is ', algochoice)
 
-
-        #creates NumberList, State, and Algorithm objects
-        x=alg.Algorithm(True, algochoice, speed, arrsize) #pass State object into Algorithm along with the choice of algorithm
-        state=x.getState()
         #while algorithm is not complete, keep on steppin'
         if(benchmark):
                 x.benchsetup(arrsize)
@@ -169,5 +183,3 @@ def main(argv):
 #random control flow to help parse cmdline args
 if __name__ == "__main__":
         main(sys.argv[1:])
-
-
