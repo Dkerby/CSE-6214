@@ -31,7 +31,7 @@ var algorithmName = algorithms[algorithm];
 var speed="Medium";
 
 var psudocode = {
-    "Merge": [
+    "Merge Sort": [
         "midpoint = length / 2</br>left_half = merge_sort(array[:midpoint])</br>right_half = merge_sort(array[midpoint:])",
         "i,j,k = 0</br>left_length = len(left_half)</br>right_length = len(right_half)",
         "while i < left_length and j < right_length:",
@@ -41,15 +41,15 @@ var psudocode = {
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[k] = left_half[i]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i += 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k += 1",
         "while j < right_length:",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[k] = right_half[j]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j += 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k += 1"
-    ], "Bubble": [
+    ], "Bubble Sort": [
         "for i in range(len(array)):",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in range(len(array)-1):",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if array[j] > [j+1]:",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[j], array[j+1] = array[j+1], array[j]"
-    ], "Insertion": [
+    ], "Insertion Sort": [
         "</br>for i in range(1, len(array)):",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while 0 < index and array[index] < array[index - 1]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[index], array[index - 1] = array[index - 1], array[index]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index -= 1"
-    ], "Heap": [
+    ], "Heap Sort": [
         "def heapify(array, index, heap_size):",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left_index = 2 * index + 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;right_index = 2 * index + 2",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if left_index < heap_size and array[left_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = left_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if right_index < heap_size and array[right_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = right_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if largest != index:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[largest], array[index] = array[index], array[largest]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, largest, heap_size)",
@@ -59,7 +59,7 @@ var psudocode = {
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for i in range(n // 2 - 1, -1, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, i, n)",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in range(n - 1, 0, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[0], array[j] = array[j], array[0]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, 0, j)",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return array"
-    ], "Quick": [
+    ], "Quick Sort": [
         "if( len(array) <= 1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return",
         "else:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pivot = len(array)-1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i=0",
         "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in array:",
@@ -74,21 +74,29 @@ var psudocode = {
     ],
 }
 
-function chooseAlgorithm(choice) {
-    if (choice != "Benchmark") {
-        document.getElementById("algorithm").innerHTML = choice + " Sort";
-        document.getElementById("speed").style.display = "block";
-    } else {
-        document.getElementById("algorithm").innerHTML = "Run Benchmarks";
-        document.getElementById("speed").style.display = "none";
-    }
+function setAlgorithm() {
+    choice = document.getElementById('algorithm').value;
     sort = choice;
-    if(!playing) showPsudocode(choice);
+    showPsudocode(choice);
 }
 
-function setSpeed(choice) {
-    document.getElementById("speed").innerHTML = choice;
+function setSpeed() {
+    choice = document.getElementById('speed').value;
     speed = choice;
+}
+
+function setList(choice) {
+    console.log(choice);
+    switch(choice) {
+        case "upload":
+            document.getElementById("file-upload").style.display = "block";
+            document.getElementById("generate-list").style.display = "none";
+            break;
+        case "generate":
+            document.getElementById("file-upload").style.display = "none";
+            document.getElementById("generate-list").style.display = "block";
+            break;
+    }
 }
 
 var barChart;
@@ -207,13 +215,10 @@ function updateBenchmarkChart(state) {
 
 function fileUploaded(fileLoaded) {
     if(fileLoaded.name.substring(fileLoaded.name.length-4) != ".txt") {
-        document.getElementById("error").innerHTML = "Only .txt files are supported";
-        return;
-    } else if (document.getElementById("error").innerHTML == "Only .txt files are supported") {
-        document.getElementById("error").innerHTML = "";
+        alert("Only .txt files are supported");
+    } else {
+        file = fileLoaded;
     }
-
-    file = fileLoaded;
 }
 
 function play() {
@@ -229,22 +234,22 @@ function play() {
     playing = true;
     var sortData = {};
     switch(sort) {
-        case 'Merge':
+        case 'Merge Sort':
             sortData.choice = 4;
             break;
-        case 'Bubble':
+        case 'Bubble Sort':
             sortData.choice = 2;
             break;
-        case 'Insertion':
+        case 'Insertion Sort':
             sortData.choice = 1;
             break;
-        case 'Heap':
+        case 'Heap Sort':
             sortData.choice = 5
             break;
-        case 'Quick':
+        case 'Quick Sort':
             sortData.choice = 3;
             break;
-        case 'Benchmark':
+        case 'Run Benchmark':
             sortData.choice = -1;
             break;
     }
@@ -281,12 +286,14 @@ function play() {
 }
 
 function showPsudocode(sort) {
-    if (sort == "Benchmark") {
+    if (sort == "Run Benchmark") {
         document.getElementById("psudocode-container").style.display = "none";
+        document.getElementById("pause").addAttribute("disabled");
         return;
     }
 
     document.getElementById("psudocode").innerHTML = "";
+    document.getElementById("pause").disabled = false;
 
     for(var line in psudocode[sort]) {
         var code = document.createElement("p");

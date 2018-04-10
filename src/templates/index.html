@@ -6,88 +6,111 @@
         <meta name="description" content="The Better Ones Sort">
         <meta name="author" content="Group 1">
 
+        <!--favicon-->
+        <link rel="icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}" type="image/x-icon">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}" type="image/x-icon">
+
+        <!--material fonts: https://material.io/icons/-->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+        <!--material design lite: https://getmdl.io/-->
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/material.min.css') }}">
         <script src="{{ url_for('static', filename='js/material.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/socket.io.slim.js') }}"></script>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+        <!--getmdl-select: https://github.com/CreativeIT/getmdl-select-->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/getmdl-select.min.css') }}">
+        <script src="{{ url_for('static', filename='js/getmdl-select.min.js') }}"></script>
+
+        <!--chartjs: http://www.chartjs.org/-->
         <script src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>
+
+        <!--socketio: https://socket.io/-->
+        <script src="{{ url_for('static', filename='js/socket.io.slim.js') }}"></script>
+
+        <!--main style sheet-->
         <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-        <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}" type="image/x-icon">
-        <link rel="icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}" type="image/x-icon">
     </head>
 
     <body>
         <!-- Always shows a header, even in smaller screens. -->
-        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
             <header class="mdl-layout__header">
                 <div class="mdl-layout__header-row">
                     <!-- Title -->
                     <span class="mdl-layout-title">The Better Ones: Sort all the things!</span>
                 </div>
             </header>
+            <div class="mdl-layout__drawer">
+                <span class="mdl-layout-title"> <strong> Run Options: </strong> </span>
+
+                <div class="options-container">
+
+                    <!--Choose Algorithm-->
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
+                        <input type="text" value="" class="mdl-textfield__input" id="algorithm" readonly>
+                        <input type="hidden" value="" name="algorithm">
+                        <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                        <label for="algorithm" class="mdl-textfield__label">Choose Algorithm</label>
+                        <ul id="algorithm-list" onclick="setAlgorithm()" for="algorithm" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                            <li class="mdl-menu__item">Merge Sort</li>
+                            <li class="mdl-menu__item">Bubble Sort</li>
+                            <li class="mdl-menu__item">Insertion Sort</li>
+                            <li class="mdl-menu__item">Heap Sort</li>
+                            <li class="mdl-menu__item">Quick Sort</li>
+                            <li class="mdl-menu__item">Run Benchmarks</li>
+                        </ul>
+                    </div>
+
+                    <!--Choose Speed-->
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
+                        <input type="text" value="" class="mdl-textfield__input" id="speed" readonly>
+                        <input type="hidden" value="" name="algorithm">
+                        <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                        <label for="speed" class="mdl-textfield__label">Choose Speed</label>
+                        <ul id="speed-list" onclick="setSpeed()" for="speed" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                            <li class="mdl-menu__item">Slow</li>
+                            <li class="mdl-menu__item">Medium</li>
+                            <li class="mdl-menu__item">Fast</li>
+                            <li class="mdl-menu__item">Ludicrous Speed</li>
+                        </ul>
+                    </div>
+
+                    <!--Choose list type-->
+                    <div>
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
+                            <input type="radio" id="option-1" onclick="setList('upload')" class="mdl-radio__button" name="opt-sortItems" checked>
+                            <span class="mdl-radio__label">Upload a list</span>
+                        </label>
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
+                            <input type="radio" id="option-2" onclick="setList('generate')" class="mdl-radio__button" name="opt-sortItems">
+                            <span class="mdl-radio__label">Generate a list</span>
+                        </label>
+                        <div id="file-upload">
+                            <input id="file" type="file" onchange="fileUploaded(this.files[0])"/>
+                            <label for="file" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                                <span> Upload file </span>
+                                <i class="material-icons">file_upload</i>
+                            </label>
+                            <p> No file uploaded </p>
+                        </div>
+                        <div id="generate-list">
+                            <span> Elements to sort: </span>
+                            <span id="sliderValue">20</span>
+                            <input id="sizeSlider" class="mdl-slider mdl-js-slider" type="range" min="2" max="100" value="20" tabindex="0" onchange="updateSliderValue()">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <main class="mdl-layout__content">
             <div class="page-content">
-                <p id="error" style="color:red"></p>
-                <div class="options-container">
-                    <div>
-                        <h4> Choose Algorithm </h4>
-                        <button id="opt-algorithm" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
-                            <span id="algorithm"> Merge Sort </span>
-                        </button>
-                        <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="opt-algorithm">
-                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Merge')">Merge Sort</li>
-                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Bubble')">Bubble Sort</li>
-                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Insertion')">Insertion Sort</li>
-                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Heap')">Heap Sort</li>
-                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Quick')">Quick Sort</li>
-                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Benchmark')">Run Benchmarks </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4> Choose Speed </h4>
-                        <button id="opt-speed" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
-                            <span id="speed"> Medium </span>
-                        </button>
-                        <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="opt-speed">
-                            <li class="mdl-menu__item" onclick="setSpeed('Slow')">Slow</li>
-                            <li class="mdl-menu__item" onclick="setSpeed('Medium')">Medium</li>
-                            <li class="mdl-menu__item" onclick="setSpeed('Fast')">Fast</li>
-                            <li class="mdl-menu__item" onclick="setSpeed('Ludicrous Speed')">Ludicrous Speed</li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4> Load a List </h4>
-                        <label style="margin-left:10%">
-                            <input id="file" type="file" onchange="fileUploaded(this.files[0])"/>
-                        </label>
-                    </div>
-
-                    <div>
-                        <h4> Or Generate Random List </h4>
-                        <h5  style="margin-left:10%"> List Size:
-                            <span id="sliderValue">20</span>
-                            <input id="sizeSlider" class="mdl-slider mdl-js-slider" type="range" min="2" max="100" value="20" tabindex="0" onchange="updateSliderValue()">
-                        </h5>
-                    </div>
-
-                    <div class="control">
-                        <button onclick="play()" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
-                            <i id="playpause" class="material-icons">play_arrow</i>
-                        </button>
-                    </div>
-
-                </div>
-
                 <div style="display:inline-flex;margin-left:5%;width:100%;">
                     <div id="psudocode-container" class="mdl-card" style="display: block; min-width: 25%;">
                         <h4 style="text-align:center"> Psudocode: </h4>
                         <code id="psudocode"></code>
-                        <button id="pause" onclick="pause()" style="text-align:center;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
-                            <i class="material-icons">pause</i>
+                        <button id="pause" onclick="pause()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
                             <span> Pause </span>
+                            <i class="material-icons">pause</i>
                         </button>
                     </div>
                     <div style="width:60%;margin-left:5%;">
@@ -101,6 +124,13 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="fab-container">
+                    <button onclick="play()" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+                        <i id="playpause" class="material-icons">play_arrow</i>
+                    </button>
+                </div>
+
             </div>
             </main>
         </div>
