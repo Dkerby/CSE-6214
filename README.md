@@ -18,6 +18,5 @@ Intro Software Engineering Group 1 Project
 
 # Tools used and corresponding resources
 - [Flask](http://flask.pocoo.org/) and [SocketIO for Flask](https://github.com/miguelgrinberg/Flask-SocketIO)
-- [ReactiveX](http://reactivex.io/) for python which is [RxPY](https://github.com/ReactiveX/RxPY)
 - Front-end styling uses [MaterialDesignLite](https://getmdl.io/index.html)
 - Our algorithm libary is credited to [TheAlgorithms](https://github.com/TheAlgorithms/Python)
