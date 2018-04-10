@@ -1,17 +1,3 @@
-.helloworld {
-	text-align: center;	
-	margin-top: 20%;
-}
-
-#helloworldbutton {
-	text-align: center;	
-	margin-left: 47%;
-}
-
-.option:hover {
-	background-color: light-blue;
-}
-
 .fileContainer {
     overflow: hidden;
     position: relative;
@@ -31,11 +17,18 @@
     top: 0;
 }
 
-#inputs {
-	margin-left: 3%;
+.options-container
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: baseline;
+    margin-bottom: 15px;
 }
 
-#control {
-	display: absolute;
-	left: 80%;
+.control
+{
+    position: absolute;
+    bottom: 5%;
+    right: 2.5%;
 }

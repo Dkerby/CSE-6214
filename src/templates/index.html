@@ -1,470 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title> The Better Ones Sort </title>
-		<meta name="description" content="The Better Ones Sort">
-		<meta name="author" content="Group 1">
+    <head>
+        <meta charset="utf-8">
+        <title> The Better Ones Sort </title>
+        <meta name="description" content="The Better Ones Sort">
+        <meta name="author" content="Group 1">
 
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/material.min.css') }}">
-		<script src="{{ url_for('static', filename='js/material.min.js') }}"></script>
-		<script src="{{ url_for('static', filename='js/socket.io.slim.js') }}"></script>
-		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-		<link rel="stylesheet" type="text/css" media="screen" href="//cdn.muicss.com/mui-0.9.38/css/mui.css" />
-		<script src="//cdn.muicss.com/mui-0.9.38/js/mui.js"></script>
-		<script src="{{ url_for('static', filename='js/chartjs/dist/Chart.js') }}"></script>
-		<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-	</head>
-	
-	<script>
-	
-var socket = io.connect('http://' + document.domain + ':' + location.port);
-socket.on('connect', function() { 
-	console.log("Server connected");
-	socket.emit('browserEvent', {data: 'Browser connected, so I emitted this data'});
-});
+        <script src="{{ url_for('static', filename='js/material.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/socket.io.slim.js') }}"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <script src="{{ url_for('static', filename='js/Chart.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}" type="image/x-icon">
+        <link rel="icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}" type="image/x-icon">
+    </head>
 
-socket.on('serverEvent', function(eventMsg) {
-	console.log("Server event:");
-	console.log(eventMsg);
-});
+    <body>
+        <!-- Always shows a header, even in smaller screens. -->
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+            <header class="mdl-layout__header">
+                <div class="mdl-layout__header-row">
+                    <!-- Title -->
+                    <span class="mdl-layout-title">The Better Ones: Sort all the things!</span>
+                </div>
+            </header>
 
-socket.on('sorting', function(data) {
-	step(data.numbers, data.i, data.j);
-	updateState(data);
-	highlightLine(data.currentLine);
-	if (playing) socket.emit("step");
-});
+            <main class="mdl-layout__content">
+            <div class="page-content">
+                <p id="error" style="color:red"></p>
+                <div class="options-container">
+                    <div>
+                        <h4> Choose Algorithm </h4>
+                        <button id="opt-algorithm" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                            <span id="algorithm"> Merge Sort </span>
+                        </button>
+                        <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="opt-algorithm">
+                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Merge')">Merge Sort</li>
+                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Bubble')">Bubble Sort</li>
+                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Insertion')">Insertion Sort</li>
+                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Heap')">Heap Sort</li>
+                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Quick')">Quick Sort</li>
+                            <li class="mdl-menu__item" onclick="chooseAlgorithm('Benchmark')">Run Benchmarks </li>
+                        </ul>
+                    </div>
 
-socket.on('doneSorting', function() {
-	stop();
-	highlightLine(-1);
-});
+                    <div>
+                        <h4> Choose Speed </h4>
+                        <button id="opt-speed" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                            <span id="speed"> Medium </span>
+                        </button>
+                        <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="opt-speed">
+                            <li class="mdl-menu__item" onclick="setSpeed('Slow')">Slow</li>
+                            <li class="mdl-menu__item" onclick="setSpeed('Medium')">Medium</li>
+                            <li class="mdl-menu__item" onclick="setSpeed('Fast')">Fast</li>
+                            <li class="mdl-menu__item" onclick="setSpeed('Ludicrous Speed')">Ludicrous Speed</li>
+                        </ul>
+                    </div>
 
-socket.on('benchmarks', function(state) {
-	updateBenchmarkChart(state);
-	document.getElementById("stats").style.opacity = 0;
-	if(!state.sorting) {
-		algorithm++; 
-		algorithmName = algorithms[algorithm];
-	}
-	if (playing) socket.emit("benchmark");
-});
+                    <div>
+                        <h4> Load a List </h4>
+                        <label style="margin-left:10%">
+                            <input id="file" type="file" onchange="fileUploaded(this.files[0])"/>
+                        </label>
+                    </div>
 
-var sort = "Merge";
-var file = "";
-var playing = false;
-var algorithm = 1;
-var algorithms = ["", "Insertion Sort", "Bubble Sort", "Quick Sort", "Merge Sort", "Heap Sort"];
-var algorithmName = algorithms[algorithm];
-var speed="Medium";
+                    <div>
+                        <h4> Or Generate Random List </h4>
+                        <h5  style="margin-left:10%"> List Size:
+                            <span id="sliderValue">20</span>
+                            <input id="sizeSlider" class="mdl-slider mdl-js-slider" type="range" min="2" max="100" value="20" tabindex="0" onchange="updateSliderValue()">
+                        </h5>
+                    </div>
 
-var psudocode = {
-	"Merge": [
-	"midpoint = length / 2</br>left_half = merge_sort(array[:midpoint])</br>right_half = merge_sort(array[midpoint:])",
-	"i,j,k = 0</br>left_length = len(left_half)</br>right_length = len(right_half)",
-	"while i < left_length and j < right_length:",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if left_half[i] < right_half[j]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[k] = left_half[i]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i += 1",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[k] = right_half[j]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j += 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k += 1",
-	"while i < left_length:",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[k] = left_half[i]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i += 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k += 1",
-	"while j < right_length:",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[k] = right_half[j]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;j += 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k += 1"
-	], "Bubble": [
-	"for i in range(len(array)):",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in range(len(array)-1):",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if array[j] > [j+1]:",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[j], array[j+1] = array[j+1], array[j]"
-	], "Insertion": [
-	"</br>for i in range(1, len(array)):",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while 0 < index and array[index] < array[index - 1]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[index], array[index - 1] = array[index - 1], array[index]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index -= 1"
-	], "Heap": [
-	"def heapify(array, index, heap_size):",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left_index = 2 * index + 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;right_index = 2 * index + 2",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if left_index < heap_size and array[left_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = left_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if right_index < heap_size and array[right_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = right_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if largest != index:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[largest], array[index] = array[index], array[largest]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, largest, heap_size)",
-	"",
-	"def heapsort(array):",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n = len(array)",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for i in range(n // 2 - 1, -1, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, i, n)",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in range(n - 1, 0, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[0], array[j] = array[j], array[0]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, 0, j)",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return array"
-	], "Quick": [
-	"if( len(array) <= 1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return",
-	"else:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pivot = len(array)-1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i=0",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in array:",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if j <= array[pivot]:",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i++</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[i], j = j, array[i]",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[i+1], array[pivot] = array[pivot], array[i+1]",
-	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QuickSort(array[:i+1])</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QuickSort(array[i+2:])"
-	], "Default": [
-	"Lines of",
-	"Psudocode for",
-	"Sorting go here"
-	],
-}
+                    <div class="control">
+                        <button onclick="play()" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+                            <i id="playpause" class="material-icons">play_arrow</i>
+                        </button>
+                    </div>
 
-function chooseAlgorithm(choice) {
-	if (choice != "Benchmark") {
-		document.getElementById("algorithm").innerHTML = choice + " Sort";
-		document.getElementById("speed").style.display = "block";
-	} else {
-		document.getElementById("algorithm").innerHTML = "Run Benchmarks";
-		document.getElementById("speed").style.display = "none";
-	}
-	sort = choice;
-	if(!playing) showPsudocode(choice);
-}
+                </div>
 
-function setSpeed(choice) {
-	document.getElementById("speed").innerHTML = choice;
-	speed = choice;
-}
+                <div style="display:inline-flex;margin-left:5%;width:100%;">
+                    <div id="psudocode-container" class="mdl-card" style="display: block; min-width: 25%;">
+                        <h4 style="text-align:center"> Psudocode: </h4>
+                        <code id="psudocode"></code>
+                        <button id="pause" onclick="pause()" style="text-align:center;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                            <i class="material-icons">pause</i>
+                            <span> Pause </span>
+                        </button>
+                    </div>
+                    <div style="width:60%;margin-left:5%;">
+                        <canvas id="numbers" style="max-height:45vh;min-width:100%;margin:2.5%;">
+                        </canvas>
+                        <div id="stats" style="opacity:0;text-align:center">
+                            <h4> <b>Compares:</b> <span id="compares"></span> </h4>
+                            <h4> <b>Swaps:</b> <span id="swaps"></span> </h4>
+                            <h4> <b>Memory Usage:</b> <span id="memory"></span> Bytes </h4>
+                            <h4> <b>Runtime:</b> <span id="runtime"></span> Seconds </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </main>
+        </div>
 
-var barChart;
+        <!-- Fix javascript scoping issue and add main inside body tag -->
+        <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-function step(list, i, j) {
-	var ctx = document.getElementById("numbers");
-	
-	var colors = [];
-	for (var each in list) {
-		if (each == i) colors.push('rgb(58, 94, 150)');
-		else if (each == j) colors.push('rgb(72, 138, 242)');
-		else colors.push('rgb(175, 203, 247)');
-	}
-	
-	
-
-	if(!barChart) {
-		var data = {
-label: 'Randomly Generated List',
-data: list,
-backgroundColor: colors
-		};
-		
-		barChart = new Chart(ctx, {
-type: 'bar',
-data: {
-labels: list,
-datasets: [data]
-			}, 
-options: {
-animation: {
-duration: 0
-				},
-legend: {
-display: false
-				},
-tooltips: {
-callbacks: {
-label: function(tooltipItem) {
-							return tooltipItem.yLabel;
-						}
-					}
-				}
-			}, 
-		});	
-	} else {
-		for (var i in list) {
-			barChart.data.datasets[0].data[i] = list[i];
-			barChart.data.datasets[0].backgroundColor[i] = colors[i];
-		}
-		barChart.data.labels = list;
-		barChart.update();
-	}
-}
-
-
-function updateBenchmarkChart(state) {
-	var ctx = document.getElementById("numbers");
-	if (!algorithmName) return;
-	
-	var colors = ["purple", "rgb(19, 54, 112)", "rgb(167, 184, 214)", "rgb(10, 22, 43)", "rgb(91, 125, 183)", "rgb(5, 69, 178)"];
-	var color = colors[algorithm];
-	
-	if(!barChart) {
-		var data = {
-			label: algorithmName,
-			data: [state.swaps, state.compares, state.memUsage, state.runtime],
-			backgroundColor: color
-		};
-		
-		barChart = new Chart(ctx, {
-		type: 'bar',
-		data: {
-			labels: ["swaps", "compares", "memory", "runtime"],
-			datasets: [data]
-		}, 
-		options: {	
-			animation: {
-				duration: 0
-			},
-			legend: {
-				display: true
-			},
-			scales: {
-            yAxes: [{
-                type: 'linear'
-            }]},
-		tooltips: {
-		callbacks: {
-		label: function(tooltipItem) {
-			return tooltipItem.yLabel;
-						}
-					}
-				}
-			}, 
-		});	
-	} else {
-		var list = [state.swaps, state.compares, state.memUsage, state.runtime];
-		var label = algorithmName;
-		if (barChart.data.datasets.length-1 < algorithm-1) {
-			barChart.data.datasets.push( {
-			label: label,
-			data: [state.swaps, state.compares, state.memUsage, state.runtime],
-			backgroundColor: color
-			});
-		}
-		
-		for (var i in list) {
-			barChart.data.datasets[algorithm-1].data[i] = list[i];
-		}
-		barChart.data.labels = ["swaps", "compares", "memory", "runtime"];
-		
-		barChart.update();
-	}
-}
-
-function fileUploaded(fileLoaded) {
-	if(fileLoaded.name.substring(fileLoaded.name.length-4) != ".txt") {
-		document.getElementById("error").innerHTML = "Only .txt files are supported";
-		return;
-	} else if (document.getElementById("error").innerHTML == "Only .txt files are supported") {
-		document.getElementById("error").innerHTML = "";
-	}
-	
-	file = fileLoaded;
-}
-
-function play() {
-	showPsudocode(sort);
-	algorithm = 1;
-	
-	if(barChart) {
-		 barChart.destroy();
-		 barChart = false;
-	}
-	
-	document.getElementById("stats").style.opacity = "1";
-	playing = true;
-	var sortData = {};
-	switch(sort) {
-	case 'Merge':
-		sortData.choice = 4;
-		break;
-	case 'Bubble':
-		sortData.choice = 2;
-		break;
-	case 'Insertion':
-		sortData.choice = 1;
-		break;
-	case 'Heap':
-		sortData.choice = 5
-		break;
-	case 'Quick':
-		sortData.choice = 3;
-		break;
-	case 'Benchmark':
-		sortData.choice = -1;
-		break;
-	}
-
-	switch(speed){
-	case 'Slow':
-		sortData.speed=0.05;
-		break;
-	case 'Medium':
-		sortData.speed=0.025;
-		break;
-	case 'Fast':
-		sortData.speed=0.001;
-		break;
-	case 'Ludicrous Speed':
-		sortData.speed=0.0;
-		break;
-	}
-	
-	if (sortData.choice < 0) sortData.speed = 0.0;
-	
-	if (file) sortData.file = file;
-	else sortData.size = parseInt(document.getElementById("sizeSlider").value);
-	
-	document.getElementById('play').innerHTML = "Stop";
-	document.getElementById('play').onclick = stop;
-	if (sortData.choice > 0) {
-		socket.emit('startSorting', sortData);
-		document.getElementById('pause').style.opacity = "1";
-		document.getElementById('pause').innerHTML = "Pause";
-	} else {
-		socket.emit('startBenchmarks', sortData);
-	}
-}
-
-function showPsudocode(sort) {
-	if (sort == "Benchmark") {
-		document.getElementById("psudocode-container").style.display = "none";
-		return;
-	}
-	
-	document.getElementById("psudocode-container").style.display = "block";
-	document.getElementById("psudocode").innerHTML = "";
-	
-	for(var line in psudocode[sort]) {
-		var code = document.createElement("p");
-		code.innerHTML = psudocode[sort][line];
-		code.id = line;
-		code.style.fontSize = "13px";
-		code.style.lineHeight = "14px";
-		document.getElementById("psudocode").appendChild(code);
-	}
-}
-
-function highlightLine(line) {
-	var children = document.getElementById("psudocode").children;
-	for (var i in children) {
-		if(i == "length") break;
-		if (i == line) {
-			children[i].style.backgroundColor = "yellow";
-		} else {
-			children[i].style.backgroundColor = "white";
-		}
-	}
-}
-
-function stop() {
-	document.getElementById('play').innerHTML = "Start";
-	document.getElementById('play').onclick = play;
-	document.getElementById('pause').style.opacity = "0";
-	playing = false;
-}
-
-function pause() {
-	if(playing) {
-		playing = false;
-		document.getElementById('pause').innerHTML = "Resume";
-		document.getElementById('step').style.opacity = "1";
-	} else {
-		playing = true;
-		socket.emit("step");
-		document.getElementById('pause').innerHTML = "Pause";
-		document.getElementById('step').style.opacity = "0";
-	}
-}
-
-function updateSliderValue() {
-	document.getElementById("sliderValue").innerHTML = document.getElementById("sizeSlider").value;
-}
-
-function updateState(state) {
-	document.getElementById("compares").innerHTML = state.compares;
-	document.getElementById("swaps").innerHTML = state.swaps;
-	document.getElementById("memory").innerHTML = state.memUsage;
-	document.getElementById("runtime").innerHTML = state.runtime;
-}
-	</script>
-
-	<body>
-		<!-- Always shows a header, even in smaller screens. -->
-		<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-		  <header class="mdl-layout__header">
-		    <div class="mdl-layout__header-row">
-		      <!-- Title -->
-		      <span class="mdl-layout-title">The Better Ones: Sort all the things!</span>
-		    </div>
-		  </header>
-
-		  <main class="mdl-layout__content">
-		    <div class="page-content">
-				<div>
-					<p id="error" style="color:red"></p>
-					<div id="inputs" style="display:inline-flex;width:85%;border-style:solid;border-color:midnightblue;padding:5px 5%;margin-bottom: 10px;">
-						<div style="position:relative;">
-							<h2> Choose Algorithm </h2>
-							<button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
-								<span id="algorithm"> Merge Sort </span>
-								<span class="mui-caret"></span>
-							</button>
-
-							<ul class="mui-dropdown__menu" style="position:absolute;">
-							<li class="option" onclick="chooseAlgorithm('Merge')">Merge Sort</li>
-							<li class="option" onclick="chooseAlgorithm('Bubble')">Bubble Sort</li>
-							<li class="option" onclick="chooseAlgorithm('Insertion')">Insertion Sort</li>
-							<li class="option" onclick="chooseAlgorithm('Heap')">Heap Sort</li>
-							<li class="option" onclick="chooseAlgorithm('Quick')">Quick Sort</li>
-							<li class="option" onclick="chooseAlgorithm('Benchmark')">Run Benchmarks </li>
-							</ul>
-						</div>
-
-						<div style="margin-left:10%;position:relative" id="speed">
-							<h2> Choose Speed </h2>
-							<button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
-								<span id="speed"> Medium </span>
-								<span class="mui-caret"></span>
-							</button>
-							<ul class="mui-dropdown__menu" style="position:absolute;margin:0;padding:0;">
-							<li class="option" onclick="setSpeed('Slow')">Slow</li>
-							<li class="option" onclick="setSpeed('Medium')">Medium</li>
-							<li class="option" onclick="setSpeed('Fast')">Fast</li>
-							<li class="option" onclick="setSpeed('Ludicrous Speed')">Ludicrous Speed</li>
-							</ul>
-						</div>
-						
-						<div style="margin-left:10%">
-						<h2> Load a List </h2>
-						<label style="margin-left:10%">
-							<input id="file" type="file" onchange="fileUploaded(this.files[0])"/>
-						</label>
-						</div>
-						
-						<div>
-						<h2> Or Generate Random List </h2>
-						<h3  style="margin-left:10%"> List Size:
-							<span id="sliderValue">20</span>
-							<input id="sizeSlider" class="mdl-slider mdl-js-slider" type="range" min="2" max="100" value="20" tabindex="0" onchange="updateSliderValue()">
-						</h3>
-						</div>
-						
-						<div style="margin-left:10%">
-							<button id="play" class="mui-btn mui-btn--primary" onclick="play()" style="margin-top:20px;"> Start </button>
-							<button id="pause" class="mui-btn mui-btn--primary" onclick="pause()" style="opacity:0; margin-top:20px;"> Pause </button>
-							<button id="step" class="mui-btn mui-btn--primary" onclick="socket.emit('step')" style="opacity:0; margin-top:20px;"> Step </button>
-						</div>
-					</div>
-					
-					<div style="display:inline-flex;margin-left:5%;width:100%;">
-						<div id="psudocode-container">
-							<h3 style="text-align:center"> Psudocode: </h3>
-							<div id="psudocode" style="min-width:25%;">
-							</div>
-						</div>
-						<script>
-							showPsudocode("Default");
-						</script>
-						<div style="width:60%;margin-left:5%;">
-							<canvas id="numbers" style="max-height:45vh;min-width:100%;">
-							</canvas>
-							<div id="stats" style="opacity:0;text-align:center">
-								<h3> <b>Compares:</b> <span id="compares"></span> </h3>
-								<h3> <b>Swaps:</b> <span id="swaps"></span> </h3>
-								<h3> <b>Memory Usage:</b> <span id="memory"></span> Bytes </h3>
-								<h3> <b>Runtime:</b> <span id="runtime"></span> Seconds </h3>
-							</div>
-						</div>
-					</div>
-					
-				</div>
-		    </div>
-		  </main>
-		</div>
-	</body>
+    </body>
 </html>

@@ -1,6 +1,5 @@
 #!/bin/env python3
-# Flask is our webserver. It handles serving and interacting with our
-# web front-end. Socket the connection.
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 
@@ -11,21 +10,10 @@ from flask_socketio import SocketIO, emit
 # import trace
 import webbrowser
 
-import NumberList as nl #holds the data
-import State as st #holds state of algorithm
-import Algorithm as alg #holds algorithm 
+# import NumberList as nl
+# import State as st
+import Algorithm as alg
 
-# Add lib folder to python runtime path inorder to import desired algorithms
-# from sortlib import
-#   bubble_sort, quick_sort, merge_sort, selection_sort, heap_sort
-
-
-###############################################################################
-# 1. We are going to define our flask main route to render our main page
-#    template
-# 2. We are going to setup socketed events for our application
-# 4. Define default browser to open up our application
-###############################################################################
 app = Flask(__name__)
 socketio = SocketIO(app)
 
@@ -33,70 +21,80 @@ algorithm = False
 numberList = False
 state = False
 
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
 
-@socketio.on('connect')
-def connect_msg():
-	print("The browser is now connected to me")
-	
 @socketio.on('startSorting')
 def startSorting(data):
-	global state
-	global algorithm
+    global state
+    global algorithm
 
-	algorithm=alg.Algorithm(True, data['choice'], data['speed'])
-	
-	if('file' in data.keys()):
-		algorithm.importText(data['file']);
-	else:
-		algorithm.setRandomData(data['size'])
+    algorithm = alg.Algorithm(True, data['choice'], data['speed'])
 
-	state=algorithm.getState()
+    if ('file' in data.keys()):
+        algorithm.importText(data['file'])
+    else:
+        algorithm.setRandomData(data['size'])
 
-	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':str("{0:.1f}".format(state.runtime)), 'currentLine':state.currentLine})
+    state = algorithm.getState()
+
+    emit('sorting', {'numbers': algorithm.getData(),
+                     'compares': state.compares,
+                     'swaps': state.swaps,
+                     'memUsage': state.memUsage,
+                     'runtime': str("{0:.1f}".format(state.runtime)),
+                     'currentLine': state.currentLine})
+
 
 @socketio.on('startBenchmarks')
 def startBenchmarks(data):
-	global algorithm
-	global state
-	
-	algorithm=alg.Algorithm(True, 1, 0.0001, data['size']) #pass State object into Algorithm along with the choice of algorithm
-	state=algorithm.getState()
-	algorithm.benchsetup(data['size'])
-	runBenchmarks()
+    global algorithm
+    global state
+
+    # pass State object into Algorithm along with the choice of algorithm
+    algorithm = alg.Algorithm(True, 1, 0.0001, data['size'])
+
+    state = algorithm.getState()
+    algorithm.benchsetup(data['size'])
+    runBenchmarks()
+
 
 @socketio.on('benchmark')
 def runBenchmarks():
-	global algorithm
-	global state
-	if state.benchmarking:
-		algorithm.benchstep()
-		state=algorithm.getState()
-		emit('benchmarks', {'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'sorting':state.sorting})
-	else:
-		emit('doneBenchmarking')
+    global algorithm
+    global state
+    if state.benchmarking:
+        algorithm.benchstep()
+        state = algorithm.getState()
+        emit('benchmarks', {'compares': state.compares,
+                            'swaps': state.swaps,
+                            'memUsage': state.memUsage,
+                            'runtime': state.runtime,
+                            'sorting': state.sorting})
+    else:
+        emit('doneBenchmarking')
+
 
 @socketio.on('step')
 def step():
-	global state
-	if(not state.sorting):
-		emit('doneSorting')
-	else:
-		algorithm.step()
-		emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':str("{0:.1f}".format(state.runtime)), 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
+    global state
+    if(not state.sorting):
+            emit('doneSorting')
+    else:
+            algorithm.step()
+            emit('sorting', {'numbers': algorithm.getData(),
+                             'compares': state.compares,
+                             'swaps': state.swaps,
+                             'memUsage': state.memUsage,
+                             'runtime': str("{0:.1f}".format(state.runtime)),
+                             'currentLine': state.currentLine,
+                             'i': state.i,
+                             'j': state.j})
 
-@socketio.on('browserEvent')
-def browser_event(eventMsg):
-	print("The browser had an event!")
-	print(eventMsg)
-
-
-def main():
-	print("hello world!")
 
 if __name__ == '__main__':
-	webbrowser.open("http://localhost:5000", 2, autoraise=True)
-	socketio.run(app, port=5000)
+    webbrowser.open("http://localhost:5000", new=0, autoraise=True)
+    socketio.run(app, port=5000)
