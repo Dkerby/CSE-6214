@@ -45,9 +45,9 @@ def connect_msg():
 @socketio.on('startSorting')
 def startSorting(data):
 	global state
-	global algorithm 
+	global algorithm
 
-	algorithm=alg.Algorithm(True, data['choice'])
+	algorithm=alg.Algorithm(True, data['choice'], data['speed'])
 	
 	if('file' in data.keys()):
 		algorithm.importText(data['file']);
@@ -56,7 +56,28 @@ def startSorting(data):
 
 	state=algorithm.getState()
 
-	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine})
+	emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':str("{0:.1f}".format(state.runtime)), 'currentLine':state.currentLine})
+
+@socketio.on('startBenchmarks')
+def startBenchmarks(data):
+	global algorithm
+	global state
+	
+	algorithm=alg.Algorithm(True, 1, 0.0001, data['size']) #pass State object into Algorithm along with the choice of algorithm
+	state=algorithm.getState()
+	algorithm.benchsetup(data['size'])
+	runBenchmarks()
+
+@socketio.on('benchmark')
+def runBenchmarks():
+	global algorithm
+	global state
+	if state.benchmarking:
+		algorithm.benchstep()
+		state=algorithm.getState()
+		emit('benchmarks', {'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'sorting':state.sorting})
+	else:
+		emit('doneBenchmarking')
 
 @socketio.on('step')
 def step():
@@ -65,7 +86,7 @@ def step():
 		emit('doneSorting')
 	else:
 		algorithm.step()
-		emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':state.runtime, 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
+		emit('sorting', {'numbers':algorithm.getData(), 'compares':state.compares, 'swaps':state.swaps, 'memUsage':state.memUsage, 'runtime':str("{0:.1f}".format(state.runtime)), 'currentLine':state.currentLine, 'i':state.i, 'j':state.j})
 
 @socketio.on('browserEvent')
 def browser_event(eventMsg):
@@ -77,5 +98,5 @@ def main():
 	print("hello world!")
 
 if __name__ == '__main__':
-	webbrowser.open("http://localhost:5500", 2, autoraise=True)
-	socketio.run(app, port=5500)
+	webbrowser.open("http://localhost:5000", 2, autoraise=True)
+	socketio.run(app, port=5000)

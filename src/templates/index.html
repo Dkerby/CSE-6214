@@ -42,9 +42,23 @@ socket.on('doneSorting', function() {
 	highlightLine(-1);
 });
 
+socket.on('benchmarks', function(state) {
+	updateBenchmarkChart(state);
+	document.getElementById("stats").style.opacity = 0;
+	if(!state.sorting) {
+		algorithm++; 
+		algorithmName = algorithms[algorithm];
+	}
+	if (playing) socket.emit("benchmark");
+});
+
 var sort = "Merge";
 var file = "";
 var playing = false;
+var algorithm = 1;
+var algorithms = ["", "Insertion Sort", "Bubble Sort", "Quick Sort", "Merge Sort", "Heap Sort"];
+var algorithmName = algorithms[algorithm];
+var speed="Medium";
 
 var psudocode = {
 	"Merge": [
@@ -66,9 +80,15 @@ var psudocode = {
 	"</br>for i in range(1, len(array)):",
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while 0 < index and array[index] < array[index - 1]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[index], array[index - 1] = array[index - 1], array[index]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index -= 1"
 	], "Heap": [
-	"Line of",
-	"Psudocode for",
-	"Heapsort"
+	"def heapify(array, index, heap_size):",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left_index = 2 * index + 1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;right_index = 2 * index + 2",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if left_index < heap_size and array[left_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = left_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if right_index < heap_size and array[right_index] > array[largest]:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;largest = right_index</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if largest != index:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[largest], array[index] = array[index], array[largest]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, largest, heap_size)",
+	"",
+	"def heapsort(array):",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;n = len(array)",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for i in range(n // 2 - 1, -1, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, i, n)",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for j in range(n - 1, 0, -1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[0], array[j] = array[j], array[0]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapify(array, 0, j)",
+	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return array"
 	], "Quick": [
 	"if( len(array) <= 1):</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return",
 	"else:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pivot = len(array)-1</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i=0",
@@ -77,13 +97,28 @@ var psudocode = {
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i++</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[i], j = j, array[i]",
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;array[i+1], array[pivot] = array[pivot], array[i+1]",
 	"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QuickSort(array[:i+1])</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QuickSort(array[i+2:])"
+	], "Default": [
+	"Lines of",
+	"Psudocode for",
+	"Sorting go here"
 	],
 }
 
 function chooseAlgorithm(choice) {
-	document.getElementById("algorithm").innerHTML = choice + " Sort";
+	if (choice != "Benchmark") {
+		document.getElementById("algorithm").innerHTML = choice + " Sort";
+		document.getElementById("speed").style.display = "block";
+	} else {
+		document.getElementById("algorithm").innerHTML = "Run Benchmarks";
+		document.getElementById("speed").style.display = "none";
+	}
 	sort = choice;
-	showPsudocode(choice);
+	if(!playing) showPsudocode(choice);
+}
+
+function setSpeed(choice) {
+	document.getElementById("speed").innerHTML = choice;
+	speed = choice;
 }
 
 var barChart;
@@ -139,6 +174,67 @@ label: function(tooltipItem) {
 	}
 }
 
+
+function updateBenchmarkChart(state) {
+	var ctx = document.getElementById("numbers");
+	if (!algorithmName) return;
+	
+	var colors = ["purple", "rgb(19, 54, 112)", "rgb(167, 184, 214)", "rgb(10, 22, 43)", "rgb(91, 125, 183)", "rgb(5, 69, 178)"];
+	var color = colors[algorithm];
+	
+	if(!barChart) {
+		var data = {
+			label: algorithmName,
+			data: [state.swaps, state.compares, state.memUsage, state.runtime],
+			backgroundColor: color
+		};
+		
+		barChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: ["swaps", "compares", "memory", "runtime"],
+			datasets: [data]
+		}, 
+		options: {	
+			animation: {
+				duration: 0
+			},
+			legend: {
+				display: true
+			},
+			scales: {
+            yAxes: [{
+                type: 'linear'
+            }]},
+		tooltips: {
+		callbacks: {
+		label: function(tooltipItem) {
+			return tooltipItem.yLabel;
+						}
+					}
+				}
+			}, 
+		});	
+	} else {
+		var list = [state.swaps, state.compares, state.memUsage, state.runtime];
+		var label = algorithmName;
+		if (barChart.data.datasets.length-1 < algorithm-1) {
+			barChart.data.datasets.push( {
+			label: label,
+			data: [state.swaps, state.compares, state.memUsage, state.runtime],
+			backgroundColor: color
+			});
+		}
+		
+		for (var i in list) {
+			barChart.data.datasets[algorithm-1].data[i] = list[i];
+		}
+		barChart.data.labels = ["swaps", "compares", "memory", "runtime"];
+		
+		barChart.update();
+	}
+}
+
 function fileUploaded(fileLoaded) {
 	if(fileLoaded.name.substring(fileLoaded.name.length-4) != ".txt") {
 		document.getElementById("error").innerHTML = "Only .txt files are supported";
@@ -151,10 +247,12 @@ function fileUploaded(fileLoaded) {
 }
 
 function play() {
+	showPsudocode(sort);
+	algorithm = 1;
+	
 	if(barChart) {
-		barChart.data.datasets[0].data = [];
-		barChart.data.datasets[0].backgroundColor = [];
-		barChart.data.labels = [];
+		 barChart.destroy();
+		 barChart = false;
 	}
 	
 	document.getElementById("stats").style.opacity = "1";
@@ -176,20 +274,51 @@ function play() {
 	case 'Quick':
 		sortData.choice = 3;
 		break;
+	case 'Benchmark':
+		sortData.choice = -1;
+		break;
 	}
+
+	switch(speed){
+	case 'Slow':
+		sortData.speed=0.05;
+		break;
+	case 'Medium':
+		sortData.speed=0.025;
+		break;
+	case 'Fast':
+		sortData.speed=0.001;
+		break;
+	case 'Ludicrous Speed':
+		sortData.speed=0.0;
+		break;
+	}
+	
+	if (sortData.choice < 0) sortData.speed = 0.0;
 	
 	if (file) sortData.file = file;
 	else sortData.size = parseInt(document.getElementById("sizeSlider").value);
-	socket.emit('startSorting', sortData);
+	
 	document.getElementById('play').innerHTML = "Stop";
 	document.getElementById('play').onclick = stop;
-	document.getElementById('pause').style.opacity = "1";
-	document.getElementById('pause').innerHTML = "Pause";
-	showPsudocode(sort);
+	if (sortData.choice > 0) {
+		socket.emit('startSorting', sortData);
+		document.getElementById('pause').style.opacity = "1";
+		document.getElementById('pause').innerHTML = "Pause";
+	} else {
+		socket.emit('startBenchmarks', sortData);
+	}
 }
 
 function showPsudocode(sort) {
+	if (sort == "Benchmark") {
+		document.getElementById("psudocode-container").style.display = "none";
+		return;
+	}
+	
+	document.getElementById("psudocode-container").style.display = "block";
 	document.getElementById("psudocode").innerHTML = "";
+	
 	for(var line in psudocode[sort]) {
 		var code = document.createElement("p");
 		code.innerHTML = psudocode[sort][line];
@@ -240,6 +369,7 @@ function updateState(state) {
 	document.getElementById("compares").innerHTML = state.compares;
 	document.getElementById("swaps").innerHTML = state.swaps;
 	document.getElementById("memory").innerHTML = state.memUsage;
+	document.getElementById("runtime").innerHTML = state.runtime;
 }
 	</script>
 
@@ -258,18 +388,34 @@ function updateState(state) {
 				<div>
 					<p id="error" style="color:red"></p>
 					<div id="inputs" style="display:inline-flex;width:85%;border-style:solid;border-color:midnightblue;padding:5px 5%;margin-bottom: 10px;">
-						<div>
+						<div style="position:relative;">
 							<h2> Choose Algorithm </h2>
 							<button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
 								<span id="algorithm"> Merge Sort </span>
 								<span class="mui-caret"></span>
 							</button>
-							<ul class="mui-dropdown__menu">
+
+							<ul class="mui-dropdown__menu" style="position:absolute;">
 							<li class="option" onclick="chooseAlgorithm('Merge')">Merge Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Bubble')">Bubble Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Insertion')">Insertion Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Heap')">Heap Sort</li>
 							<li class="option" onclick="chooseAlgorithm('Quick')">Quick Sort</li>
+							<li class="option" onclick="chooseAlgorithm('Benchmark')">Run Benchmarks </li>
+							</ul>
+						</div>
+
+						<div style="margin-left:10%;position:relative" id="speed">
+							<h2> Choose Speed </h2>
+							<button class="mui-btn mui-btn--primary" data-mui-toggle="dropdown">
+								<span id="speed"> Medium </span>
+								<span class="mui-caret"></span>
+							</button>
+							<ul class="mui-dropdown__menu" style="position:absolute;margin:0;padding:0;">
+							<li class="option" onclick="setSpeed('Slow')">Slow</li>
+							<li class="option" onclick="setSpeed('Medium')">Medium</li>
+							<li class="option" onclick="setSpeed('Fast')">Fast</li>
+							<li class="option" onclick="setSpeed('Ludicrous Speed')">Ludicrous Speed</li>
 							</ul>
 						</div>
 						
@@ -296,13 +442,13 @@ function updateState(state) {
 					</div>
 					
 					<div style="display:inline-flex;margin-left:5%;width:100%;">
-						<div>
+						<div id="psudocode-container">
 							<h3 style="text-align:center"> Psudocode: </h3>
 							<div id="psudocode" style="min-width:25%;">
 							</div>
 						</div>
 						<script>
-							showPsudocode("Merge");
+							showPsudocode("Default");
 						</script>
 						<div style="width:60%;margin-left:5%;">
 							<canvas id="numbers" style="max-height:45vh;min-width:100%;">
@@ -310,7 +456,8 @@ function updateState(state) {
 							<div id="stats" style="opacity:0;text-align:center">
 								<h3> <b>Compares:</b> <span id="compares"></span> </h3>
 								<h3> <b>Swaps:</b> <span id="swaps"></span> </h3>
-								<h3> <b>Memory Usage:</b> <span id="memory"></span> </h3>
+								<h3> <b>Memory Usage:</b> <span id="memory"></span> Bytes </h3>
+								<h3> <b>Runtime:</b> <span id="runtime"></span> Seconds </h3>
 							</div>
 						</div>
 					</div>

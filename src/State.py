@@ -3,10 +3,7 @@ class State():
 
         self.data=NumberObj
         self.sorting = sorting
-        self.comparisons = int(comparisons)
-        self.movements = int(movements)
-        self.memoryUsage = float(memoryUsage)
-        self.runtime = float(runtime)
+        self.benchmarking=True
         self.speed=float(speed)
 
         #the rest of the data members start at zero.
@@ -15,16 +12,7 @@ class State():
         self.compares = 0
         self.swaps = 0
         self.memUsage = float(0.0)
+        self.maxmem=float(0.0)
         self.runtime = float(0.0)
         self.i=0
         self.j=0
-        
-        # def dump(self):
-        #     print("x:", self.x)
-        #     print("y:", self.y)
-        #     print("y:", self.z)
-
-        # def set_values(self,A,B,C):
-        #     self.x = A
-        #     self.y= B
-        #     self.z= C
