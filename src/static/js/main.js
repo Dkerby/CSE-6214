@@ -77,10 +77,10 @@ var psudocode = {
 function chooseAlgorithm(choice) {
     if (choice != "Benchmark") {
         document.getElementById("algorithm").innerHTML = choice + " Sort";
-        document.getElementById("speed").style.display = "block";
+        document.getElementById("speed-container").style.display = "block";
     } else {
         document.getElementById("algorithm").innerHTML = "Run Benchmarks";
-        document.getElementById("speed").style.display = "none";
+        document.getElementById("speed-container").style.display = "none";
     }
     sort = choice;
     if(!playing) showPsudocode(choice);
@@ -314,7 +314,7 @@ function highlightLine(line) {
 }
 
 function stop() {
-	 document.getElementById('playpause').innerText = "play_arrow";
+	document.getElementById('playpause').innerText = "play_arrow";
     document.getElementById('play').onclick = play;
     document.getElementById('pause').style.opacity = "0";
     playing = false;
