@@ -55,10 +55,13 @@ def startBenchmarks(data):
     global state
 
     # pass State object into Algorithm along with the choice of algorithm
-    algorithm = alg.Algorithm(True, 1, 0.0001, data['size'])
+    algorithm = alg.Algorithm(True, 1, 0.0001)
 
     state = algorithm.getState()
-    algorithm.benchsetup(data['size'])
+    if ('file' in data.keys()):
+        algorithm.benchsetup(inputtext=data['file'])
+    else:
+        algorithm.benchsetup(data['size'])
     runBenchmarks()
 
 
@@ -96,5 +99,5 @@ def step():
 
 
 if __name__ == '__main__':
-    webbrowser.open("http://localhost:5000", new=0, autoraise=True)
-    socketio.run(app, port=5000)
+    webbrowser.open("http://localhost:6000", new=0, autoraise=True)
+    socketio.run(app, port=6000)
