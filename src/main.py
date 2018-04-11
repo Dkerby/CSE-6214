@@ -96,5 +96,5 @@ def step():
 
 
 if __name__ == '__main__':
-    webbrowser.open("http://localhost:5006", new=0, autoraise=True)
-    socketio.run(app, port=5006)
+    webbrowser.open("http://localhost:5000", new=0, autoraise=True)
+    socketio.run(app, port=5000)
