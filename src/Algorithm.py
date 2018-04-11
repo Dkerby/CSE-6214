@@ -194,7 +194,7 @@ class Algorithm(object):
         #*****************************************************************************************
         # SETUP THE ALGORITHM OBJECT FOR BENCHMARKING
         
-        def benchsetup(self, randsize=200, inputfile="", outputfile="benchmark.log"):
+        def benchsetup(self, randsize=200, inputfile="", inputtext="", outputfile="benchmark.log"):
 
                 #set outputfile
                 self.outputfile=outputfile
@@ -202,7 +202,8 @@ class Algorithm(object):
                 #if user wants to import a file with data, this will allow it
                 if(inputfile!=""):
                         self.importData(inputfile)
-
+                elif(inputtext != ""):
+                        self.importText(inputtext)
                 else:
                         self.setRandomData(randsize)
 
