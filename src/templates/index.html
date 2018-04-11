@@ -82,13 +82,13 @@
                 </div>
 
                 <div style="display:inline-flex;margin-left:5%;width:100%;">
-                    <div id="psudocode-container" class="mdl-card" style="display: block; min-width: 25%;">
-                        <h4 style="text-align:center"> Psudocode: </h4>
-                        <code id="psudocode"></code>
-                        <button id="pause" onclick="pause()" style="text-align:center;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+                    <div id="psudocode-container" class="mdl-card" style="display: none; min-width: 25%;">
+					    <button id="pause" onclick="pause()" style="text-align:center;opacity:0;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
                             <i class="material-icons">pause</i>
                             <span> Pause </span>
                         </button>
+                        <h4 style="text-align:center"> Psudocode: </h4>
+                        <code id="psudocode"></code>
                     </div>
                     <div style="width:60%;margin-left:5%;">
                         <canvas id="numbers" style="max-height:45vh;min-width:100%;margin:2.5%;">
