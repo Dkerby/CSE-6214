@@ -206,6 +206,7 @@ function updateBenchmarkChart(state) {
 }
 
 function fileUploaded(fileLoaded) {
+	fileLoaded = fileLoaded[fileLoaded.length-1];
     if(fileLoaded.name.substring(fileLoaded.name.length-4) != ".txt") {
         document.getElementById("error").innerHTML = "Only .txt files are supported";
         return;
