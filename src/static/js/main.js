@@ -270,11 +270,13 @@ function play() {
     else sortData.size = parseInt(document.getElementById("sizeSlider").value);
 
     document.getElementById('playpause').innerText = "stop";
-    document.getElementById('playpause').onclick = stop;
+    document.getElementById('play').onclick = stop;
     if (sortData.choice > 0) {
         socket.emit('startSorting', sortData);
         document.getElementById('pause').style.opacity = "1";
         document.getElementById('pause').innerHTML = "Pause";
+		document.getElementById("psudocode-container").style.display = "block";
+		document.getElementById("psudocode-container").style.opacity = "1";
     } else {
         socket.emit('startBenchmarks', sortData);
     }
@@ -287,6 +289,7 @@ function showPsudocode(sort) {
     }
 
     document.getElementById("psudocode").innerHTML = "";
+	document.getElementById("psudocode-container").style.display = "block";
 
     for(var line in psudocode[sort]) {
         var code = document.createElement("p");
@@ -311,8 +314,8 @@ function highlightLine(line) {
 }
 
 function stop() {
-    document.getElementById('playpause').innerText = "play_arrow";
-    document.getElementById('playpause').onclick = play;
+	 document.getElementById('playpause').innerText = "play_arrow";
+    document.getElementById('play').onclick = play;
     document.getElementById('pause').style.opacity = "0";
     playing = false;
 }
